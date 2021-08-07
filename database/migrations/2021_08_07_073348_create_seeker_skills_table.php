@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateClientInfoTable extends Migration
+class CreateSeekerSkillsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,15 @@ class CreateClientInfoTable extends Migration
      */
     public function up()
     {
-        Schema::create('client_info', function (Blueprint $table) {
+        Schema::create('seeker_skills', function (Blueprint $table) {
             $table->id();
+
+            $table->unsignedBigInteger('skill_id')->unsigned();
+            $table->foreign("skill_id")->references('id')->on("skills");
+
+            $table->unsignedBigInteger('cv_id')->unsigned();
+            $table->foreign("cv_id")->references('id')->on("cvs");
+
             $table->timestamps();
         });
     }
@@ -26,6 +33,6 @@ class CreateClientInfoTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('client_info');
+
     }
 }
