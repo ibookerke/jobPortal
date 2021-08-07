@@ -1,7 +1,10 @@
 <template>
-    <div>
+    <div v-if="user.email">
         <Navbar :user="user"></Navbar>
         <router-view :user_info="user" @getUser="login"></router-view>
+    </div>
+    <div v-else>
+        <h1>Loading</h1>
     </div>
 </template>
 
@@ -31,6 +34,7 @@ export default {
             }).then(response => {
                 this.user = response.data
                 this.$store.commit("setUserInfo", response.data)
+                this.$store.commit("stopUserLoading")
 
             }).catch(error=> {
                 console.log("error", error)

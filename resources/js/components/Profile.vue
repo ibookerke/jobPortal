@@ -31,9 +31,12 @@ export default {
             this.user = this.user_info
         }
     },
+    mounted() {
 
+    },
     created() {
         this.user = this.user_info
+
     },
 
     methods: {

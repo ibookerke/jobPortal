@@ -2,18 +2,14 @@
     <v-container>
         <v-row>
             <v-col>
-                <router-link
-                    :to="{ name: 'save-cv' }"
-                    :user_info="user"
+                <v-btn
+                    @click="$router.push({name: 'save_cv'})"
+                    rounded
+                    color="primary"
+                    dark
                 >
-                    <v-btn
-                        rounded
-                        color="primary"
-                        dark
-                    >
-                        Create CV
-                    </v-btn>
-                </router-link>
+                    Create CV
+                </v-btn>
             </v-col>
         </v-row>
     </v-container>
