@@ -77,7 +77,7 @@ export default {
                 localStorage.setItem("token", response.data.data.original.access_token)
                 this.$store.commit('setUserInfo', response.data.data.original.user)
                 this.$emit("getUser", response.data.data.original.user)
-
+                this.$router.push({name: "profile"})
 
             }).catch(error=> {
 

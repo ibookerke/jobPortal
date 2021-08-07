@@ -1,8 +1,15 @@
 export default {
     state: {
-        user: {}
+        user: {},
+        user_loading: true
     },
     mutations: {
+        startUserLoading(state) {
+            state.user_loading = true
+        },
+        stopUserLoading(state) {
+            state.user_loading = false
+        },
         setUserInfo(state, user_data) {
             state.user = user_data
         },
@@ -14,6 +21,9 @@ export default {
 
     },
     getters: {
+        getUserLoadingStatus(state) {
+            return state.user_loading
+        },
         getUserData(state) {
             return state.user;
         }
