@@ -32,11 +32,12 @@ export default {
         }
     },
 
+    created() {
+        this.user = this.user_info
+    },
+
     methods: {
-        getUser(user_data) {
-            this.$emit("auth", user_data)
-            this.user = user_data
-        }
+
     }
 }
 </script>

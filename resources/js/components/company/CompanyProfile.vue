@@ -3,6 +3,7 @@
         <pre>{{user}}</pre>
 
         <h1>Hello, company  {{user.email}}</h1>
+
     </div>
 </template>
 
@@ -18,9 +19,18 @@ export default {
         "user_info"
     ],
 
+    watch: {
+        user_info() {
+            this.user = this.user_info
+        }
+    },
+
     created() {
         this.user = this.user_info
     },
+    methods: {
+
+    }
 }
 </script>
 
