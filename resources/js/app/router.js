@@ -10,6 +10,7 @@ import LoginComponent from "../components/auth/LoginComponent";
 import Register from "../components/auth/Register";
 import Applications from "../components/seeker/Applications";
 import MyJobPosts from "../components/company/MyJobPosts";
+import SaveCV from "../components/SaveCV";
 
 Vue.use(VueRouter)
 
@@ -83,6 +84,11 @@ const routes = [
         path: "/access_denied",
         name: "access_denied",
         component: AccessDenied
+    },
+    {
+        path: "/СV-editor",
+        name: "save-cv",
+        component: SaveCV
     },
     {
         path: "*",
