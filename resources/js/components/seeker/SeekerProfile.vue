@@ -17,8 +17,10 @@ export default {
     props: [
         "user_info"
     ],
-    created() {
-        this.user = this.user_info
+    watch: {
+        user_info() {
+            this.user = this.user_info
+        }
     },
 
 }
