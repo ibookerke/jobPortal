@@ -55,10 +55,11 @@
 
             <template v-if="auth" v-slot:extension>
                 <v-tabs v-if="user.user_type_id === 1" align-with-title>
-                    <v-tab>
-                        <v-tab @click="$router.push('/profile')">
-                            Профиль
-                        </v-tab>
+                    <v-tab @click="$router.push('/profile')">
+                        Профиль
+                    </v-tab>
+                    <v-tab @click="$router.push('/my_job_posts')">
+                        Мои вакансии
                     </v-tab>
                 </v-tabs>
                 <v-tabs v-if="user.user_type_id === 2" align-with-title>

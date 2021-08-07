@@ -78,6 +78,7 @@ export default {
                 this.$store.commit('setUserInfo', response.data.data.original.user)
                 this.$emit("getUser", response.data.data.original.user)
 
+
             }).catch(error=> {
 
                 if(error.response){

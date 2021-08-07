@@ -1,7 +1,7 @@
 <template>
     <div>
         <Navbar :user="user"></Navbar>
-        <router-view :user_info="user" @auth="login"></router-view>
+        <router-view :user_info="user" @getUser="login"></router-view>
     </div>
 </template>
 
