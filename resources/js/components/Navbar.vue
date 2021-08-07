@@ -9,7 +9,7 @@
 
             <v-toolbar-title>
                 <router-link to="/" class="title">
-                    Turan
+                    JobPortal
                 </router-link>
             </v-toolbar-title>
 
@@ -54,27 +54,19 @@
 
 
             <template v-if="auth" v-slot:extension>
-                <v-tabs v-if="user.role === 1" align-with-title>
+                <v-tabs v-if="user.user_type_id === 1" align-with-title>
                     <v-tab>
-                        <v-tab @click="$router.push('/administrator')">
+                        <v-tab @click="$router.push('/profile')">
                             Профиль
                         </v-tab>
                     </v-tab>
-                    <v-tab>
-                        <router-link :to="{name: 'my_events'}">
-                            Мои концерты
-                        </router-link>
-                    </v-tab>
                 </v-tabs>
-                <v-tabs v-if="user.role === 2" align-with-title>
-                    <v-tab @click="$router.push('/administrator')">
+                <v-tabs v-if="user.user_type_id === 2" align-with-title>
+                    <v-tab @click="$router.push('/profile')">
                         Профиль
                     </v-tab>
-                    <v-tab @click="$router.push('/admin_locations')">
-                        Редактор Локаций
-                    </v-tab>
-                    <v-tab @click="$router.push('/admin_events')">
-                        Редактор Событий
+                    <v-tab @click="$router.push('/applications')">
+                        Отклики
                     </v-tab>
                 </v-tabs>
             </template>

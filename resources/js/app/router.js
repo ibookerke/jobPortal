@@ -3,11 +3,12 @@ import VueRouter from "vue-router"
 import store from "./store";
 
 import HomeComponent from "../components/HomeComponent";
-import AdminPage from "../components/admin/AdminPage";
 import NotFound from "../components/NotFound";
-import Location from "../components/admin/Location";
 import AccessDenied from "../components/AccessDenied";
-import EventEditor from "../components/admin/EventEditor";
+import Profile from "../components/Profile";
+import LoginComponent from "../components/auth/LoginComponent";
+import Register from "../components/auth/Register";
+import Applications from "../components/seeker/Applications";
 
 Vue.use(VueRouter)
 
@@ -26,39 +27,25 @@ const routes = [
         component: HomeComponent
     },
     {
-        path: "/administrator",
-        name: "admin_page",
-        component: AdminPage,
+        path: "/login",
+        name: "login",
+        component: LoginComponent,
     },
     {
-        path: "/admin_locations",
-        name: "admin_locations",
-        component: Location,
-        beforeEnter: (to, from, next) => {
-            let user = store.getters.getUserData
-            if(user.role === 2) {
-                next()
-            }
-            else{
-                next({name: 'home'})
-            }
-        }
+        path: "/register",
+        name: "register",
+        component: Register
     },
     {
-        path: "/admin_events",
-        name: "admin_events",
-        component: EventEditor,
-        beforeEnter: (to, from, next) => {
-            let user = store.getters.getUserData
-            if(user.role === 2) {
-                next()
-            }
-            else{
-                next({name: 'home'})
-            }
-        }
+        path: "/profile",
+        name : "profile",
+        component: Profile
     },
-
+    {
+        path: "/applications",
+        name: "application",
+        component: Applications
+    },
     {
         path: "/access_denied",
         name: "access_denied",
