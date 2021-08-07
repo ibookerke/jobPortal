@@ -1,9 +1,22 @@
 <template>
-    <div>
-        <pre>{{user}}</pre>
-
-        <h1>Hello, seeker {{user.email}}</h1>
-    </div>
+    <v-container>
+        <v-row>
+            <v-col>
+                <router-link
+                    :to="{ name: 'save-cv' }"
+                    :user_info="user"
+                >
+                    <v-btn
+                        rounded
+                        color="primary"
+                        dark
+                    >
+                        Create CV
+                    </v-btn>
+                </router-link>
+            </v-col>
+        </v-row>
+    </v-container>
 </template>
 
 <script>
