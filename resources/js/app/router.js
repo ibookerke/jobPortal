@@ -11,7 +11,6 @@ import Register from "../components/auth/Register";
 import Applications from "../components/seeker/Applications";
 import MyJobPosts from "../components/company/MyJobPosts";
 import SaveCV from "../components/seeker/SaveCV";
-import Loading from "../components/Loading";
 
 Vue.use(VueRouter)
 
@@ -22,48 +21,18 @@ const originalPush = VueRouter.prototype.push
 VueRouter.prototype.push = function push(location) {
     return originalPush.call(this, location).catch(err => err)
 }
+
+//routing access setting
+// 0 for authenticated only; 1 for companies; 2 for job seekers; 3 for superuser only; 4 for not authenticated users only
 var access = {
     application : 2,
     my_job_posts : 1,
+    save_cv: 2,
+
+
     profile: 0,
-    save_cv: 2
-}
-
-const userLoadCheck = (to, from, next) => {
-    // we must wait for the store to be initialized
-    if (store.getters.getUserLoadingStatus) {
-        console.log('loading')
-
-        // store.watch(
-        //     (state) => store.getters.user_loading,
-        //     (value) => {
-        //         console.log("rara", value)
-        //         if (value === false){
-        //             if(access[to.name] === 0) {
-        //                 next()
-        //             }
-        //             else{
-        //                 let user = store.getters.getUserData
-        //                 if(user.user_type_id === access[to.name]){
-        //                     next()
-        //                 }
-        //                 else{
-        //                     next({name: "access_denied"})
-        //                 }
-        //             }
-        //         }
-        //     }
-        // )
-    }
-    else{
-        next("/")
-    }
-}
-
-function is_allowed(path) {
-    let user = store.getters.getUserData
-
-    return access[path.name] === user.user_type_id;
+    login: 4,
+    register: 4
 }
 
 const routes = [
@@ -85,36 +54,27 @@ const routes = [
     {
         path: "/profile",
         name : "profile",
-        component: Profile,
-        beforeEnter: userLoadCheck
+        component: Profile
     },
     {
         path: "/applications",
         name: "application",
-        component: Applications,
-        beforeEnter: userLoadCheck
+        component: Applications
     },
     {
         path: "/my_job_posts",
         name: "my_job_posts",
-        component: MyJobPosts,
-        beforeEnter: userLoadCheck
+        component: MyJobPosts
     },
     {
         path: "/cv_editor",
         name: "save_cv",
-        component: SaveCV,
-        beforeEnter: userLoadCheck
+        component: SaveCV
     },
     {
         path: "/access_denied",
         name: "access_denied",
         component: AccessDenied
-    },
-    {
-        path: "/loading",
-        name: "loading_screen",
-        component: Loading
     },
     {
         path: "*",
@@ -127,6 +87,68 @@ const routes = [
 const router = new VueRouter({
     mode: "history",
     routes
+})
+
+//before entering the url checking if the user data have loaded and the user have access to the url
+router.beforeEach((to, from, next) => {
+
+    //looking if the url needs access check
+    if(Object.keys(access).includes(to.name)){
+        //url proceeding
+        function proceed() {
+            if(store.getters.getAuthStatus) {
+                if(access[to.name] === 0) {
+                    next()
+                }
+                else if(access[to.name] === 4) {
+                    next({name: "profile"})
+                }
+                else{
+                    let user = store.getters.getUserData
+                    if(user.user_type_id === access[to.name]){
+                        next()
+                    }
+                    else{
+                        next({name: "access_denied"})
+                    }
+                }
+            }
+            else{
+                if(access[to.name] === 0) {
+                    next({name: "login"})
+                }
+                else if(access[to.name] === 4) {
+                    next()
+                }
+                else{
+                    next({name: "access_denied"})
+                }
+
+            }
+        }
+
+        //making watch on the store user loading status waiting till the loading have ended
+        if(store.getters.getUserLoadingStatus){
+            store.watch(
+                (state, getters) => getters.getUserLoadingStatus,
+                (newValue, oldValue) => {
+                    console.log(`Updating from ${oldValue} to ${newValue}`);
+
+                    if(!newValue) {
+                        console.log("new value", store.getters.getUserData)
+                        proceed()
+                    }
+                }
+            )
+        }
+        else{
+            proceed()
+        }
+    }
+    else{
+        next()
+    }
+
 })
 
 export default router

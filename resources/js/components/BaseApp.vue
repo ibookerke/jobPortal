@@ -1,11 +1,15 @@
 <template>
-    <div v-if="user.email">
-        <Navbar :user="user"></Navbar>
-        <router-view :user_info="user" @getUser="login"></router-view>
+    <div>
+        <Navbar :user_info="user"></Navbar>
+        <router-view v-if="!loading" :user_info="user" @getUser="login"></router-view>
+        <div class="loader" v-else>
+            <v-progress-linear
+                color="white"
+                indeterminate
+            ></v-progress-linear>
+        </div>
     </div>
-    <div v-else>
-        <h1>Loading</h1>
-    </div>
+
 </template>
 
 <script>
@@ -16,41 +20,57 @@ export default {
     name: "BaseApp",
     data(){
         return  {
-            user: {}
+            user: {},
+            loading: true
         }
     },
     components: {
         Navbar
     },
 
-    beforeCreate() {
-        let token = localStorage.getItem("token")
+    created() {
+        this.getUserLoad()
 
-        if(token) {
-            axios.get("/api/auth/user-profile", {
-                headers: {
-                    "Authorization" : "Bearer " + token
+        this.unwatch = this.$store.watch(
+            (state, getters) => getters.getUserLoadingStatus,
+            (newValue, oldValue) => {
+                this.loading = newValue
+                if(!newValue) {
+                    this.user = this.$store.getters.getUserData
                 }
-            }).then(response => {
-                this.user = response.data
-                this.$store.commit("setUserInfo", response.data)
-                this.$store.commit("stopUserLoading")
-
-            }).catch(error=> {
-                console.log("error", error)
-            })
-        }
+            }
+        )
     },
 
     methods: {
         login(user_data) {
             this.user = user_data
-        }
+        },
+
+        getUserLoad() {
+            let token = localStorage.getItem("token")
+            if(token){
+                this.$store.dispatch("LoadUser", token)
+            }
+            else{
+                this.loading = false
+                this.$store.commit("stopUserLoading")
+            }
+        },
+    },
+
+    beforeDestroy() {
+
+        this.unwatch();
     },
 
 }
 </script>
 
 <style scoped>
-
+.loader {
+    background: #8E8E8E;
+    width: 100%;
+    height: 100vh;
+}
 </style>
