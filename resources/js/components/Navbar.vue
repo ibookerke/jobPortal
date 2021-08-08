@@ -15,17 +15,11 @@
 
             <v-spacer></v-spacer>
 
-<!--            <v-btn icon>-->
-<!--                <v-icon>mdi-dots-vertica</v-icon>-->
-<!--            </v-btn>-->
-
-            <v-btn icon @click="test">
-                <v-icon>mdi-magnify</v-icon>
-            </v-btn>
-
             <v-menu
-                left
-                bottom
+                v-model="user_menu"
+                :close-on-content-click="true"
+                :nudge-width="200"
+                offset-y
             >
                 <template v-slot:activator="{ on, attrs }">
                     <v-btn
@@ -33,24 +27,69 @@
                         v-bind="attrs"
                         v-on="on"
                     >
-                        <v-icon>mdi-cog</v-icon>
+                        <v-icon>mdi-account</v-icon>
                     </v-btn>
                 </template>
 
-                <v-list>
-                    <v-list-item
-                        v-for="n in 5"
-                        :key="n"
-                        @click="() => {}"
-                    >
-                        <v-list-item-title>Option {{ n }}</v-list-item-title>
-                    </v-list-item>
-                </v-list>
-            </v-menu>
+                <v-card v-if="auth">
+                    <v-list>
+                        <v-list-item>
+                            <v-list-item-content>
+                                <v-list-item-title>{{user.email}}</v-list-item-title>
+                                <v-list-item-subtitle v-if="user.user_type_id === 1">Работдатель</v-list-item-subtitle>
+                            </v-list-item-content>
 
-            <v-btn icon v-if="auth" @click="logOut">
-                <v-icon>mdi-logout</v-icon>
-            </v-btn>
+                        </v-list-item>
+                    </v-list>
+
+                    <v-divider></v-divider>
+
+                    <v-list>
+                        <v-list-item
+                            link
+                            @click="$router.push({name: 'profile'})"
+                        >
+                            <v-list-item-title>Профиль</v-list-item-title>
+                        </v-list-item>
+                        <v-divider></v-divider>
+                        <v-list-item
+                            link
+                            @click="logOut"
+                        >
+                            <v-list-item-title>Выйти</v-list-item-title>
+                        </v-list-item>
+                    </v-list>
+
+                </v-card>
+                <v-card v-else>
+                    <v-list>
+                        <v-list-item>
+                            <v-list-item-content>
+                                <v-list-item-title class="text-center">Вы не авторизованы</v-list-item-title>
+                            </v-list-item-content>
+                        </v-list-item>
+                    </v-list>
+
+                    <v-divider></v-divider>
+
+                    <v-list>
+                        <v-list-item
+                            link
+                            @click="$router.push({name: 'login'})"
+                        >
+                            <v-list-item-title>Войти</v-list-item-title>
+                        </v-list-item>
+
+                        <v-list-item
+                            link
+                            @click="$router.push({name: 'register'})"
+                        >
+                            <v-list-item-title>Создать аккаунт</v-list-item-title>
+                        </v-list-item>
+
+                    </v-list>
+                </v-card>
+            </v-menu>
 
 
             <template v-if="auth" v-slot:extension>
@@ -89,7 +128,10 @@ export default {
             winWidth: window.innerWidth,
             mobile: false,
             tablet: false,
-            auth: false
+            auth: false,
+
+            user_menu: false,
+
         }
     },
 
