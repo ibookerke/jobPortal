@@ -162,6 +162,7 @@
                                                     :nudge-right="40"
                                                     transition="scale-transition"
                                                     offset-y
+                                                    required
                                                     min-width="auto"
                                                 >
                                                     <template v-slot:activator="{ on, attrs }">
@@ -224,6 +225,7 @@
                                                 <v-text-field
                                                     label="Organization"
                                                     outlined
+                                                    required
                                                     v-model="workExperience.defaultCompanyName"
                                                 ></v-text-field>
                                             </v-col>
@@ -233,6 +235,7 @@
                                                 <v-text-field
                                                     label="Job Title"
                                                     outlined
+                                                    required
                                                     v-model="workExperience.defaultJobTitle"
                                                 ></v-text-field>
                                             </v-col>
@@ -242,6 +245,7 @@
                                                 <v-text-field
                                                     label="Job Description"
                                                     outlined
+                                                    required
                                                     v-model="workExperience.defaultJobDescription"
                                                 ></v-text-field>
                                             </v-col>
@@ -269,6 +273,40 @@
                         </v-dialog>
                     </v-col>
 
+                </v-row>
+                <v-row v-for="(item, index) in workExperience.array" :key="index">
+                    <v-col>
+                        <v-card outlined>
+                            <v-card-title>
+                                {{ item.company_name }}
+                            </v-card-title>
+                            <v-card-subtitle>
+                                {{ 'from ' + item.start_date + ' to ' + item.endDate }}
+                            </v-card-subtitle>
+                            <v-card-text>
+                                {{ item.job_description }}
+                            </v-card-text>
+                            <v-card-actions>
+                                <v-btn
+                                    color="error"
+                                    depressed
+                                    @click="deleteWorkExperience(index)"
+                                >
+                                    <v-icon dark>
+                                        mdi-delete
+                                    </v-icon>
+                                </v-btn>
+                                <v-btn
+                                    color="primary"
+                                    depressed
+                                >
+                                    <v-icon dark>
+                                        mdi-pencil
+                                    </v-icon>
+                                </v-btn>
+                            </v-card-actions>
+                        </v-card>
+                    </v-col>
                 </v-row>
             </div>
             <v-row>
@@ -384,6 +422,9 @@ export default {
             this.workExperience.array[this.workExperience.array.length] = workExperience;
             console.log(this.workExperience.array);
             this.closeWorkExperienceDialog();
+        },
+        deleteWorkExperience(index) {
+            this.workExperience.array.splice(index, 1);
         },
         saveForm() {
             console.log(this.profileInfo)
