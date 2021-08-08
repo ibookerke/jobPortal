@@ -1,5 +1,5 @@
 <template>
-    <v-card class="mx-auto pa-4 mt-3" min-width="500px" max-width="600px" >
+    <v-card class="mx-auto pa-4 mt-7" min-width="300px" max-width="600px" >
         <v-form
             ref="form"
             v-model="valid"
@@ -23,14 +23,21 @@
                 hint="Минимум 8 символов"
                 class="input-group--focused"
                 @click:append="show = !show"
+                @keypress="inputEnter($event)"
             ></v-text-field>
 
-            <v-btn
-                color="success"
-                @click="login()"
-            >
-                Войти
-            </v-btn>
+            <div id="form_footer">
+                <v-btn
+                    color="success"
+                    @click="login()"
+                >
+                    Войти
+                </v-btn>
+
+                <p @click="$router.push({name: 'register'})">
+                    Зарегистрироваться
+                </p>
+            </div>
         </v-form>
         <v-alert
             class="mt-5"
@@ -44,12 +51,17 @@
             {{error}}
         </v-alert>
     </v-card>
-
 </template>
 
 <script>
+
+import Register from "./Register";
+
 export default {
     name: "LoginComponent",
+    components: {
+        Register
+    },
     data: () => ({
         show: false, //show password button
         valid: true,
@@ -66,8 +78,13 @@ export default {
         }
 
     }),
-
     methods: {
+        inputEnter: function($event){
+            if($event.charCode === 13){
+                this.login()
+            }
+        },
+
         login() {
             axios.post('/api/auth/login', {
                 "email": this.email,
@@ -101,5 +118,18 @@ export default {
 </script>
 
 <style scoped>
-
+    #form_footer{
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    #form_footer p{
+        margin: 0;
+        color: #2998ff;
+        text-decoration: underline;
+        cursor: pointer;
+    }
+    #form_footer p:hover{
+        color: #43a047;
+    }
 </style>
