@@ -10,7 +10,7 @@ import LoginComponent from "../components/auth/LoginComponent";
 import Register from "../components/auth/Register";
 import Applications from "../components/seeker/Applications";
 import MyJobPosts from "../components/company/MyJobPosts";
-import SaveCV from "../components/seeker/SaveCV";
+import SaveCV from "../components/seeker/CVEditor/SaveCV";
 
 Vue.use(VueRouter)
 
