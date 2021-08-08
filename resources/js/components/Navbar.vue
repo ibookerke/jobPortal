@@ -19,7 +19,7 @@
 <!--                <v-icon>mdi-dots-vertica</v-icon>-->
 <!--            </v-btn>-->
 
-            <v-btn icon>
+            <v-btn icon @click="test">
                 <v-icon>mdi-magnify</v-icon>
             </v-btn>
 
@@ -80,10 +80,12 @@
 export default {
     name: "Navbar",
     props: [
-        "user"
+        "user_info"
     ],
     data() {
         return {
+            user: {},
+
             winWidth: window.innerWidth,
             mobile: false,
             tablet: false,
@@ -91,9 +93,18 @@ export default {
         }
     },
 
+    created(){
+        this.user = this.user_info
+        if(this.user.email) {
+            this.auth = true
+        }
+    },
+
     watch: {
-        user() {
-            if(this.user) {
+        user_info() {
+            this.user = this.user_info
+
+            if(this.user.email) {
                 this.auth = true
             }
         },
@@ -126,12 +137,13 @@ export default {
     },
 
     methods: {
+        test() {
+            console.log(this.user)
+            console.log(this.user_info)
+            console.log(this.auth)
+        },
+
         logOut() {
-            axios.post("/api/auth/logout", {}, {
-                headers: {
-                    "Authorization" : "Bearer " + localStorage.getItem("token")
-                }
-            })
             this.$store.commit('userLogOut')
             localStorage.clear()
             this.$router.go() //reloads the page
