@@ -138,9 +138,7 @@ export default {
 
     methods: {
         test() {
-            console.log(this.user)
-            console.log(this.user_info)
-            console.log(this.auth)
+            console.log(this.$store.getters.getCvProfile)
         },
 
         logOut() {

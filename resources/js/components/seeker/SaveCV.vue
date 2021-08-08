@@ -435,6 +435,13 @@ export default {
         this.dateOfBirth.max = this.eligibleDateOfBirth();
     },
     watch: {
+        profileInfo: {
+            handler: function (val) {
+                this.$store.commit("cvUpdateProfile", val)
+            },
+            deep : true
+        },
+
         user_info() {
             this.user = this.user_info;
             this.profileInfo.user_id = this.user.id;
