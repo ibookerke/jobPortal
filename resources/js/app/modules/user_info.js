@@ -34,7 +34,7 @@ export default {
     actions: {
         LoadUser({commit}, token) {
             commit("startUserLoading")
-            axios.get("/api/auth/user-profile", {
+            axios.get("/api/user-profile", {
                 headers: {
                     "Authorization" : "Bearer " + token
                 }
@@ -51,7 +51,7 @@ export default {
             })
         },
         Logout({commit}, token) {
-            axios.post("/api/auth/logout", {}, {
+            axios.post("/api/logout", {}, {
                 headers: {
                     "Authorization" : "Bearer " + token
                 }
