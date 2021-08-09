@@ -12,6 +12,7 @@ import Applications from "../components/seeker/Applications";
 import MyJobPosts from "../components/company/MyJobPosts";
 import SaveCV from "../components/seeker/CVEditor/SaveCV";
 import CompanyEditor from "../components/company/CompanyEditor";
+import JobPostEditor from "../components/company/JobPostEditor";
 
 Vue.use(VueRouter)
 
@@ -30,6 +31,7 @@ var access = {
     my_job_posts : 1,
     save_cv: 2,
     edit_company: 1,
+    edit_job_post: 1,
 
 
     profile: 0,
@@ -77,6 +79,11 @@ const routes = [
         path: "edit_company",
         name: "edit_company",
         component: CompanyEditor
+    },
+    {
+        path: "edit_job_post",
+        name: "edit_job_post",
+        component: JobPostEditor
     },
 
 
