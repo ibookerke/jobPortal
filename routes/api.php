@@ -33,7 +33,7 @@ Route::group([
 
 Route::group(['middleware' => ['jwt.verify'], ], function() {
     //making locations
-    Route::post("/saveCompany", [\App\Http\Controllers\CompanyController::class, "createCompany"]);
+    Route::post("/createCompany", [\App\Http\Controllers\CompanyController::class, "createCompany"]);
     Route::post("/updateCompany", [\App\Http\Controllers\CompanyController::class, "updateCompany"]);
     Route::get("/getCompany/{user_id}", [\App\Http\Controllers\CompanyController::class, "getCompany"]);
 

@@ -60,7 +60,6 @@ export default {
     },
 
     beforeDestroy() {
-
         this.unwatch();
     },
 

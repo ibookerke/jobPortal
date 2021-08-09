@@ -11,6 +11,7 @@ import Register from "../components/auth/Register";
 import Applications from "../components/seeker/Applications";
 import MyJobPosts from "../components/company/MyJobPosts";
 import SaveCV from "../components/seeker/CVEditor/SaveCV";
+import CompanyEditor from "../components/company/CompanyEditor";
 
 Vue.use(VueRouter)
 
@@ -28,6 +29,7 @@ var access = {
     application : 2,
     my_job_posts : 1,
     save_cv: 2,
+    edit_company: 1,
 
 
     profile: 0,
@@ -71,6 +73,14 @@ const routes = [
         name: "save_cv",
         component: SaveCV
     },
+    {
+        path: "edit_company",
+        name: "edit_company",
+        component: CompanyEditor
+    },
+
+
+
     {
         path: "/access_denied",
         name: "access_denied",

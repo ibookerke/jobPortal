@@ -44,7 +44,7 @@ const opts = {
     theme: {
         themes: {
             light: {
-                primary: colors.indigo.darken3,
+                primary: '#6200EA',
                 success: colors.green.darken1,
                 secondary: colors.grey.darken1,
                 error: colors.red.darken2,

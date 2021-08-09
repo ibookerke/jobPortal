@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Company;
+use App\Models\CompanyBusinessStream;
+use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 
@@ -11,9 +14,8 @@ class CompanyController extends Controller
 
     private $create_rules = [
         'company_name' => "required|min:2|max:100",
-        'user_id' => "required|numeric|min:1",
+        'user_id' => "required|numeric|min:1|unique:companies",
         'profile_description' => "required|max:1000",
-        'business_stream_id' => "required|numeric|min:1",
         'establishment_date' => "date_format:Y-m-d|before:today",
         'company_website_url' => 'max:500|nullable|max:500|regex:/^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/',
         'image' => 'min:2|max:255'
@@ -23,7 +25,6 @@ class CompanyController extends Controller
         'company_name' => "min:2|max:100",
         'user_id' => "required|numeric|min:1",
         'profile_description' => "nullable|max:1000",
-        'business_stream_id' => "numeric|min:1",
         'establishment_date' => "min:10|max:10|date_format:Y-m-d|before:today",
         'company_website_url' => 'min:2|max:500|regex:/^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/',
         'image' => 'min:2|max:255'
@@ -40,14 +41,18 @@ class CompanyController extends Controller
             //checking if the data passed satisfies the validation requirements
             $validator = Validator::make($request->all(), $this->create_rules);
             if($validator->fails()){
-                return response()->json(["status" => "error", "errors" => $validator->errors()], 400);
+                return response()->json(["status" => "error", "message" => "Ошибки валидации", "errors" => $validator->errors()], 400);
+            }
+
+            $user = User::where("id", "=", $content->user_id)->first();
+            if($user->user_type_id !== 1) {
+                return response()->json(["statue" => "error", "message" => "Только работодатель может созадвать компанию"]);
             }
 
             $company = new Company();
             $company->company_name = $content->company_name;
             $company->user_id = $content->user_id;
             $company->profile_description = $content->profile_description;
-            $company->business_stream_id = $content->business_stream_id;
 
             if(property_exists($content, "establishment_date")){
                 $company->establishment_date = $content->establishment_date;
@@ -98,10 +103,6 @@ class CompanyController extends Controller
                 $company->profile_description = $content->profile_description;
             }
 
-            if(property_exists($content, "business_stream_id")){
-                $company->business_stream_id = $content->business_stream_id;
-            }
-
             if(property_exists($content, "establishment_date")){
                 $company->establishment_date = $content->establishment_date;
             }
@@ -127,6 +128,14 @@ class CompanyController extends Controller
         $company = Company::where("user_id", "=", $user_id)
             ->first();
 
-        return response()->json(["status" => "success", "company" => $company], 200);
+
+        $data = DB::table('company_business_stream')
+            ->join('business_stream', "company_business_stream.business_stream_id", "=", "business_stream.id")
+            ->join("companies", "company_business_stream.company_id", "=", "companies.id")
+            ->select('business_stream_id', 'business_stream_name')
+            ->get();
+
+
+        return response()->json(["status" => "success", "company" => $company, "business_stream" => $data], 200);
     }
 }
