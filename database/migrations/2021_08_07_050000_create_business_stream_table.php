@@ -15,6 +15,9 @@ class CreateBusinessStreamTable extends Migration
     {
         Schema::create('business_stream', function (Blueprint $table) {
             $table->id();
+
+
+
             $table->string('business_stream_name', 100);
         });
     }
