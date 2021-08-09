@@ -7,7 +7,7 @@
                         {{ item.company_name }}
                     </v-card-title>
                     <v-card-subtitle>
-                        {{ 'from ' + item.start_date + ' to ' + endDate(item.start_date) }}
+                        {{ 'from ' + item.start_date + ' to ' + endDate(item.end_date) }}
                     </v-card-subtitle>
                     <v-card-text>
                         {{ item.job_description }}

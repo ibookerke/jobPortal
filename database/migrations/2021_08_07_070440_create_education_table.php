@@ -24,7 +24,7 @@ class CreateEducationTable extends Migration
 
             $table->string("certificate_degree_name", 255);
             $table->string("major", 255)->nullable();
-            $table->date("staring_date");
+            $table->date("starting_date");
             $table->date("completing_date");
 
             $table->string("percentage")->nullable();

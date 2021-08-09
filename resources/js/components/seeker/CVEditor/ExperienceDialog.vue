@@ -14,10 +14,7 @@
             </v-btn>
         </template>
         <v-card>
-            <v-form
-                ref="form"
-                lazy-validation
-            >
+            <v-form>
                 <v-container>
                     <v-row>
                         <v-col>
@@ -33,12 +30,15 @@
                                     <v-text-field
                                         v-model="experience.start_date"
                                         :label="labels.start_date"
-                                        :rules="rules.start_date"
-                                        required
                                         prepend-icon="mdi-calendar"
                                         readonly
                                         v-bind="attrs"
                                         v-on="on"
+
+                                        :error-messages="startDateErrors"
+                                        required
+                                        @input="$v.experience.start_date.$touch()"
+                                        @blur="$v.experience.start_date.$touch()"
                                     ></v-text-field>
                                 </template>
                                 <v-date-picker
@@ -68,7 +68,7 @@
                             >
                                 <template v-slot:activator="{ on, attrs }">
                                     <v-text-field
-                                        v-model="experience.end_date"
+                                        v-model.trim="experience.end_date"
                                         :label="labels.end_date"
                                         required
                                         prepend-icon="mdi-calendar"
@@ -78,7 +78,7 @@
                                     ></v-text-field>
                                 </template>
                                 <v-date-picker
-                                    v-model="experience.end_date"
+                                    v-model.trim="experience.end_date"
                                     @input="endDateMenu = false"
                                     :min="experience.start_date"
                                     :max="currentDate"
@@ -90,33 +90,45 @@
                     <v-row>
                         <v-col>
                             <v-text-field
-                                v-model="experience.company_name"
+                                v-model.trim="experience.company_name"
                                 :label="labels.company_name"
-                                :rules="rules.company_name"
                                 outlined
+
+                                :error-messages="companyNameErrors"
+                                :counter="255"
                                 required
+                                @input="$v.experience.company_name.$touch()"
+                                @blur="$v.experience.company_name.$touch()"
                             ></v-text-field>
                         </v-col>
                     </v-row>
                     <v-row>
                         <v-col>
                             <v-text-field
-                                v-model="experience.job_title"
+                                v-model.trim="experience.job_title"
                                 :label="labels.job_title"
-                                :rules="rules.job_title"
                                 outlined
+
+                                :error-messages="jobTitleErrors"
+                                :counter="255"
                                 required
+                                @input="$v.experience.job_title.$touch()"
+                                @blur="$v.experience.job_title.$touch()"
                             ></v-text-field>
                         </v-col>
                     </v-row>
                     <v-row>
                         <v-col>
                             <v-textarea
-                                v-model="experience.job_description"
+                                v-model.trim="experience.job_description"
                                 :label="labels.job_description"
-                                :rules="rules.job_description"
                                 outlined
+
+                                :error-messages="jobDescriptionErrors"
+                                :counter="4000"
                                 required
+                                @input="$v.experience.job_description.$touch()"
+                                @blur="$v.experience.job_description.$touch()"
                             ></v-textarea>
                         </v-col>
                     </v-row>
@@ -146,17 +158,12 @@
 </template>
 
 <script>
-import DateField from "../../Inputs/DateField";
-import Checkbox from "../../Inputs/Checkbox";
-import TextField from "../../Inputs/TextField";
+import { validationMixin } from 'vuelidate'
+import { required, minLength, maxLength, between } from 'vuelidate/lib/validators'
 
 export default {
+    mixins: [validationMixin],
     name: "ExperienceDialog",
-    components: {
-        TextField,
-        Checkbox,
-        DateField
-    },
     props: {
         'user_id': {
             type: Number,
@@ -191,25 +198,58 @@ export default {
                 company_name: 'Company name',
                 job_title: 'Job title',
                 job_description: 'Job description'
-            },
-
-            rules: {
-                start_date: [
-                    v => !!v || this.labels.start_date + ' is required'
-                ],
-                company_name: [
-                    v => !!v || this.labels.company_name + ' is required',
-                    v => (v && v.length <= 255) || this.labels.company_name + ' must be less than 255 characters',
-                ],
-                job_title: [
-                    v => !!v || this.labels.job_title + ' is required',
-                    v => (v && v.length <= 255) || this.labels.job_title + ' must be less than 255 characters',
-                ],
-                job_description: [
-                    v => !!v || this.labels.job_description + ' is required',
-                    v => (v && v.length <= 4000) || this.labels.job_description + ' must be less than 4000 characters',
-                ],
             }
+        }
+    },
+    validations: {
+        experience: {
+            start_date: {
+                required
+            },
+            job_title: {
+                required,
+                minLength: minLength(2),
+                maxLength: maxLength(255)
+            },
+            company_name: {
+                required,
+                minLength: minLength(2),
+                maxLength: maxLength(255)
+            },
+            job_description: {
+                required,
+                minLength: minLength(2),
+                maxLength: maxLength(4000)
+            },
+        }
+    },
+    computed: {
+        jobTitleErrors () {
+            const errors = [];
+            if (!this.$v.experience.job_title.$dirty) return errors;
+            !this.$v.experience.job_title.maxLength && errors.push('Job title must be at most 255 characters long');
+            !this.$v.experience.job_title.required && errors.push('Job title is required.');
+            return errors;
+        },
+        companyNameErrors () {
+            const errors = [];
+            if (!this.$v.experience.company_name.$dirty) return errors;
+            !this.$v.experience.company_name.maxLength && errors.push('Company name must be at most 255 characters long');
+            !this.$v.experience.company_name.required && errors.push('Company name is required.');
+            return errors;
+        },
+        jobDescriptionErrors () {
+            const errors = [];
+            if (!this.$v.experience.job_description.$dirty) return errors;
+            !this.$v.experience.job_description.maxLength && errors.push('Job description must be at most 4000 characters long');
+            !this.$v.experience.job_description.required && errors.push('Job description is required.');
+            return errors;
+        },
+        startDateErrors () {
+            const errors = [];
+            if (!this.$v.experience.start_date.$dirty) return errors;
+            !this.$v.experience.start_date.required && errors.push('Start of work is required.');
+            return errors;
         }
     },
     methods: {
@@ -227,10 +267,24 @@ export default {
         },
 
         saveExperience() {
-            if (this.$refs.form.validate())
-            {
+            this.$v.$touch();
+            if (this.$v.$invalid) {
+                this.submitStatus = 'ERROR';
+            } else {
+                // do your submit logic here
+                this.submitStatus = 'PENDING';
+                this.$v.$reset();
+
+                if (this.experience.is_current_job) {
+                    this.experience.end_date = null;
+                }
+                this.experience.is_current_job = this.experience.is_current_job ? 1 : 0;
+
                 this.$emit('newExperience', JSON.parse(JSON.stringify(this.experience)));
-                this.$refs.form.reset();
+
+                setTimeout(() => {
+                    this.submitStatus = 'OK'
+                }, 500);
                 this.closeDialog();
             }
         }
