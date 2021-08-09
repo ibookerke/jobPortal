@@ -27,8 +27,8 @@ class AuthController extends Controller{
     public function login(Request $request){
 
         $validator = Validator::make($request->all(), [
-            'email' => 'required|email',
-            'password' => 'required|string|min:4',
+            'email' => 'required|email|min:2|max:255',
+            'password' => 'required|string|min:8',
         ]);
 
         if ($validator->fails()) {
@@ -48,17 +48,26 @@ class AuthController extends Controller{
      * @return \Illuminate\Http\JsonResponse
      */
     public function register(Request $request) {
+
+        //checking if the request body is filled correctly
+        $content = json_decode($request->getContent());
+        if(json_last_error() != JSON_ERROR_NONE){
+            return response()->json(["status" => "error", "message" => "Ошибка валидации JSON"], 400);
+        }
+
         $validator = Validator::make($request->all(), [
-            'email' => 'required|string|email|max:100|unique:users',
-            'password' => 'required|string|confirmed|min:4',
-            'user_type_id' => 'required|max:2'
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|confirmed|min:8',
+            'user_type_id' => 'required|max:1|min:1'
         ]);
 
+        if($content->user_type_id != 1 || $content->user_type_id != 2) {
+            return response()->json(["status" => "error", "message" => "Некорректный тип пользовталя"], 400);
+        }
 
         if($validator->fails()){
             return response()->json($validator->errors()->toJson(), 400);
         }
-
 
         $user = User::create(array_merge(
             $validator->validated(),
@@ -66,21 +75,26 @@ class AuthController extends Controller{
         ));
 
         return response()->json([
-            'message' => 'User successfully registered',
+            'message' => 'Пользователь успешно создан',
             'user' => $user
         ], 201);
     }
-
 
     /**
      * Log the user out (Invalidate the token).
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function logout() {
-        auth()->logout();
 
-        return response()->json(['message' => 'User successfully signed out']);
+    public function logout() {
+        try{
+            auth()->logout();
+
+            return response()->json(['message' => 'User successfully signed out']);
+        }
+        catch(\Exception $e) {
+            return response()->json(["message" => $e->getMessage()], 400);
+        }
     }
 
     /**
