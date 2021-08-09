@@ -42,6 +42,11 @@ Route::group(['middleware' => ['jwt.verify'], ], function() {
     Route::post("/getLocations", [\App\Http\Controllers\LocationController::class, "getLocations"]);
     Route::post("/saveLocation", [\App\Http\Controllers\LocationController::class, "saveLocation"]);
 
+    Route::post('/save_seeker_cv', [CVController::class, 'createCV']);
+    
+    Route::post('/get_skills', [\App\Http\Controllers\SkillsController::class, 'getSkills']);
+    Route::post('/search_skills', [\App\Http\Controllers\SkillsController::class, 'searchSkills']);
+
     Route::post("/createEvent", [\App\Http\Controllers\EventController::class, "create_event"]);
 });
 

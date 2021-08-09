@@ -28,6 +28,7 @@
     "dependencies": {
         "vue-phone-number-input": "^1.1.10",
         "vue-router": "^3.5.2",
+        "vuelidate": "^0.7.6",
         "vuetify": "^2.5.8",
         "vuex": "^3.6.2"
     }

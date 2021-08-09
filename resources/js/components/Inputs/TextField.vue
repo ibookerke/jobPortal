@@ -5,6 +5,7 @@
                 :label="label"
                 outlined
                 :required="required"
+                :rules="rules"
                 v-model="value"
             ></v-text-field>
         </v-col>
@@ -14,6 +15,7 @@
             :label="label"
             outlined
             :required="required"
+            :rules="rules"
             v-model="value"
         ></v-text-field>
     </v-col>
@@ -39,14 +41,16 @@ export default {
             type: Boolean,
             default: false
         },
-        clear:{
-            type: Boolean,
-            default: false
+        rules: {
+            type: Array,
+            default: function () {
+                return []
+            }
         }
     },
     data() {
         return {
-            value: ''
+            value: ' '
         }
     },
     watch: {

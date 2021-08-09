@@ -22,6 +22,10 @@ export default {
         radios: {
             type: [Object, Array],
             required: true
+        },
+        required: {
+            type: Boolean,
+            default: false
         }
     },
     data() {

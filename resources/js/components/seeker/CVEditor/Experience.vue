@@ -32,7 +32,6 @@
 </template>
 
 <script>
-import TextField from "../../Inputs/TextField";
 import RadioButton from "../../Inputs/RadioButton";
 import ExperienceDialog from "./ExperienceDialog";
 import ExperienceCards from "./ExperienceCards";
@@ -42,7 +41,6 @@ export default {
     components: {
         ExperienceCards,
         ExperienceDialog,
-        TextField,
         RadioButton
     },
     props: {
@@ -76,6 +74,13 @@ export default {
 
         deleteExperience(value) {
             this.experience.splice(value, 1);
+        }
+    },
+    watch: {
+        experience: function () {
+            if (this.workExperienceRadio.value) {
+                this.$emit('input', this.experience);
+            }
         }
     }
 }
