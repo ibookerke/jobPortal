@@ -32,15 +32,32 @@
 <script>
 export default {
     name: "EducationCards",
-    props: {
-        'education': {
-            type: Array,
-            required: true
+    data() {
+        return {
+            education: null
         }
+    },
+    created() {
+        if (this.$store.getters.getCVEditType) {
+            this.education = this.$store.getters.getCVEducation;
+        }
+        this.unwatch = this.$store.watch(
+            (state, getters) => getters.getCVEducation,
+            (newValue, oldValue) => {
+                this.education = newValue;
+            }
+        )
+    },
+    beforeDestroy() {
+        this.unwatch();
     },
     methods: {
         deleteEducation(index) {
-            this.$emit('deleteEducation', index);
+            if (this.$store.getters.getCVEditType && this.education[index].hasOwnProperty('id'))
+            {
+                this.$store.commit('updateRemovedEd', this.education[index].id);
+            }
+            this.$store.commit('cvRemoveEducation', index);
         }
     }
 }

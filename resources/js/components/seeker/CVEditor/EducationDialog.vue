@@ -9,6 +9,7 @@
                    dark
                    v-bind="attrs"
                    v-on="on"
+                   @click="getData"
             >
                 Add education
             </v-btn>
@@ -174,12 +175,6 @@ import { required, maxLength } from 'vuelidate/lib/validators'
 export default {
     mixins: [validationMixin],
     name: "EducationDialog",
-    props: {
-        'user_id': {
-            type: Number,
-            required: true
-        }
-    },
     data() {
         return {
             dialog: false,
@@ -187,16 +182,7 @@ export default {
             startingDateMenu: false,
             completingDateMenu: false,
 
-            education: {
-                user_id: this.user_id,
-                cv_id: null,
-                certificate_degree_name: null,
-                major: null,
-                starting_date: null,
-                completing_date: null,
-                percentage: null,
-                cgpa: null,
-            },
+            education: {},
 
             labels: {
                 certificate_degree_name: 'Certificate degree name',
@@ -271,16 +257,13 @@ export default {
         }
     },
     methods: {
-        clearEducation() {
-            for (const property in this.education) {
-                this.education[property] = null;
-            }
-            this.education.user_id = this.user_id;
+        getData() {
+            this.education = this.$store.getters.getCVEd;
         },
 
         closeDialog() {
             this.dialog = false;
-            this.clearEducation();
+            this.education = {};
         },
 
         saveEducation() {
@@ -292,7 +275,9 @@ export default {
                 this.submitStatus = 'PENDING';
                 this.$v.$reset();
 
-                this.$emit('newEducation', JSON.parse(JSON.stringify(this.education)));
+                this.$store.commit('cvAppendEducation', this.education);
+                this.$store.commit('clearCVEd');
+
 
                 setTimeout(() => {
                     this.submitStatus = 'OK'

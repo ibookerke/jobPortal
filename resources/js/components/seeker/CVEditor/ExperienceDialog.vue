@@ -9,6 +9,7 @@
                    dark
                    v-bind="attrs"
                    v-on="on"
+                   @click="getData"
             >
                 Add work
             </v-btn>
@@ -164,12 +165,6 @@ import { required, minLength, maxLength, between } from 'vuelidate/lib/validator
 export default {
     mixins: [validationMixin],
     name: "ExperienceDialog",
-    props: {
-        'user_id': {
-            type: Number,
-            required: true
-        }
-    },
     data() {
         return {
             dialog: false,
@@ -180,16 +175,7 @@ export default {
             // data for date pickers
             currentDate: new Date().toISOString().slice(0,10),
 
-            experience: {
-                user_id: this.user_id,
-                cv_id: null,
-                is_current_job: true,
-                start_date: null,
-                end_date: null,
-                job_title: null,
-                company_name: null,
-                job_description: null,
-            },
+            experience: {},
 
             labels: {
                 start_date: 'Start of work',
@@ -253,17 +239,13 @@ export default {
         }
     },
     methods: {
-        clearExperience() {
-            for (const property in this.experience) {
-                this.experience[property] = null;
-            }
-            this.experience.user_id = this.user_id;
-            this.experience.is_current_job = true;
+        getData() {
+            this.experience = this.$store.getters.getCVExp;
         },
 
         closeDialog() {
             this.dialog = false;
-            this.clearExperience();
+            this.experience = {};
         },
 
         saveExperience() {
@@ -280,7 +262,8 @@ export default {
                 }
                 this.experience.is_current_job = this.experience.is_current_job ? 1 : 0;
 
-                this.$emit('newExperience', JSON.parse(JSON.stringify(this.experience)));
+                this.$store.commit('cvAppendExperience', this.experience);
+                this.$store.commit('clearCVExp');
 
                 setTimeout(() => {
                     this.submitStatus = 'OK'

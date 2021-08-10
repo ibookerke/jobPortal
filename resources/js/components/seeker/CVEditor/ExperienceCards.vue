@@ -32,15 +32,32 @@
 <script>
 export default {
     name: "ExperienceCards",
-    props: {
-        'experience': {
-            type: Array,
-            required: true
+    data() {
+        return {
+            experience: null
         }
+    },
+    created() {
+        if (this.$store.getters.getCVEditType) {
+            this.experience = this.$store.getters.getCVExperience;
+        }
+        this.unwatch = this.$store.watch(
+            (state, getters) => getters.getCVExperience,
+            (newValue, oldValue) => {
+                this.experience = newValue;
+            }
+        )
+    },
+    beforeDestroy() {
+        this.unwatch();
     },
     methods: {
         deleteExperience(index) {
-            this.$emit('deleteExperience', index);
+            if (this.$store.getters.getCVEditType && this.experience[index].hasOwnProperty('id'))
+            {
+                this.$store.commit('updateRemovedExp', this.experience[index].id);
+            }
+            this.$store.commit('cvRemoveExperience', index);
         },
 
         endDate(date) {
