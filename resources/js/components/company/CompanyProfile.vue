@@ -1,18 +1,27 @@
 <template>
     <div>
-        <h1 v-if="loading">Компания грузится</h1>
+        <div class="loader" v-if="loading">
+            <v-progress-linear
+                color="white"
+                indeterminate
+            ></v-progress-linear>
+        </div>
         <div v-else>
             <h1 v-if="this.company === null">Компания отсутствует у пользователя</h1>
             <div v-else-if="this.company.id">
-                <section class="d-flex justify-space-between pt-8">
+                <section class="d-flex justify-space-around pt-8 flex-wrap">
                     <div class="left d-flex flex-column">
                         <div>
-                            <img :src="'./storage/default.jpg'" alt="">
+                            <img v-if="company.image === null" :src="'./storage/default.jpg'" alt="">
+                            <img v-else :src="'./storage/' + user.id + '_' + company.image" alt="">
                         </div>
 
                         <div>
-                            <a class="deep-purple--text" :href="company.company_website_url">
+                            <a class="deep-purple--text" :href="company.company_website_url" v-if="company.company_website_url.length <= 30">
                                 {{company.company_website_url}}
+                            </a>
+                            <a class="deep-purple--text" :href="company.company_website_url" v-else>
+                                {{company.company_website_url.substring(0, 30) + '...'}}
                             </a>
                         </div>
 
@@ -27,7 +36,7 @@
                             </p>
                         </div>
                         <div>
-                            <v-btn color="primary">
+                            <v-btn color="primary" @click="$router.push({name: 'edit_company'})">
                                 Редактировать
                             </v-btn>
                         </div>
@@ -35,21 +44,19 @@
                     </div>
 
 
-
-
                     <div class="right">
-                        <h1 class="text-capitalize">{{company.company_name}}</h1>
-                        <p class="font-weight-bold">Описание</p>
+                        <h1 class="text-capitalize mb-4">{{company.company_name}}</h1>
+                        <hr class="mb-2">
                         <p>
-                            {{company.profile_description}}
+                            <span class="font-weight-bold">Дата основания: </span>{{company.establishment_date}}
                         </p>
+                        <p class="font-weight-bold">Описание</p>
+                        <pre id="description">{{company.profile_description}}</pre>
 
                     </div>
                 </section>
             </div>
         </div>
-
-        <h1>Hello, company  {{user.email}}</h1>
     </div>
 </template>
 
@@ -102,14 +109,23 @@ export default {
 
 <style scoped>
 
+    #description {
+        white-space: pre-wrap;
+        font-family: Arial,sans-serif;
+        font-size:1em;
+    }
+
+    hr{
+        background: #6200EA;
+        height: 2px;
+        border: none;
+    }
+
     section {
         margin: auto;
         width: 90%;
     }
 
-    section div{
-
-    }
     .left{
         background: #f9f9f9;
         width: 210px;
@@ -121,10 +137,14 @@ export default {
     .left p {
         font-size: 14px;
     }
+    .left a{
+        word-wrap: break-word;
+    }
     .left img{
         width: 170px;
         height: 170px;
     }
+
     .right{
         padding-left: 20px;
         width: 70%;
