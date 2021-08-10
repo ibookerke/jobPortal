@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CVController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
@@ -43,7 +44,10 @@ Route::group(['middleware' => ['jwt.verify'], ], function() {
     Route::post("/saveLocation", [\App\Http\Controllers\LocationController::class, "saveLocation"]);
 
     Route::post('/save_seeker_cv', [CVController::class, 'createCV']);
-    
+    Route::post('/update_seeker_cv', [CVController::class, 'updateCV']);
+    Route::post('/get_seeker_cvs', [CVController::class, 'getSeekerCVs']);
+    Route::post('/delete_seeker_cv', [CVController::class, 'deleteCV']);
+
     Route::post('/get_skills', [\App\Http\Controllers\SkillsController::class, 'getSkills']);
     Route::post('/search_skills', [\App\Http\Controllers\SkillsController::class, 'searchSkills']);
 

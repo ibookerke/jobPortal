@@ -12,7 +12,7 @@
             item-value="id"
             :search-input.sync="search"
             hide-selected
-            hint="Maximum of 5 tags"
+            hint="Maximum of 30 tags"
             label="Add some tags"
             multiple
             persistent-hint
@@ -75,13 +75,17 @@ export default {
     },
     created() {
         this.getSkills();
+        if (this.$store.getters.getCVEditType)
+        {
+            this.model = this.$store.getters.getCVSkills;
+        }
     },
     watch: {
-        model (val) {
+        model (val, old) {
             if (val.length > 30) {
-                this.$nextTick(() => this.model.pop())
+                this.$nextTick(() => this.model.pop());
             }
-            this.$emit('input', val);
+            this.$store.commit('setCVSkills', val);
         },
         search (val) {
             if (val !== null && val !== '')

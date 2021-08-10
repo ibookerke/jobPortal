@@ -2,10 +2,17 @@
     <div>
         <v-row>
             <v-col>
-                <radio-button :label="labels.workExperienceRadio"
-                              :radios="workExperienceRadio.radios"
-                              v-model="workExperienceRadio.value"
-                />
+                <v-radio-group v-model="workExperienceRadio.value"
+                >
+                    <template>
+                        <div>{{ labels.workExperienceRadio }}</div>
+                    </template>
+                    <v-radio v-for="(item, key) in workExperienceRadio.radios"
+                             :label="item"
+                             :value="key"
+                             :key="key"
+                    ></v-radio>
+                </v-radio-group>
             </v-col>
         </v-row>
         <div v-if="workExperienceRadio.value">
@@ -19,20 +26,15 @@
                     <v-label>Places of work</v-label>
                 </v-col>
                 <v-col>
-                    <experience-dialog :user_id="user_id"
-                                       @newExperience="addExperience"
-                    />
+                    <experience-dialog/>
                 </v-col>
             </v-row>
-            <experience-cards :experience="experience"
-                              @deleteExperience="deleteExperience"
-            />
+            <experience-cards/>
         </div>
     </div>
 </template>
 
 <script>
-import RadioButton from "../../Inputs/RadioButton";
 import ExperienceDialog from "./ExperienceDialog";
 import ExperienceCards from "./ExperienceCards";
 
@@ -40,14 +42,7 @@ export default {
     name: "Profession",
     components: {
         ExperienceCards,
-        ExperienceDialog,
-        RadioButton
-    },
-    props: {
-        'user_id': {
-            type: Number,
-            required: true
-        }
+        ExperienceDialog
     },
     data() {
         return {
@@ -60,27 +55,21 @@ export default {
                 value: null
             },
 
-            experience: [],
-
             labels: {
                 workExperienceRadio: 'Work experience',
             },
         }
     },
-    methods: {
-        addExperience(value) {
-            this.experience.push(value);
-        },
-
-        deleteExperience(value) {
-            this.experience.splice(value, 1);
+    created() {
+        let get = this.$store.getters;
+        if (get.getCVEditType)
+        {
+            this.workExperienceRadio.value = get.getCVExperience.length ? 1 : 0;
         }
     },
     watch: {
-        experience: function () {
-            if (this.workExperienceRadio.value) {
-                this.$emit('input', this.experience);
-            }
+        'workExperienceRadio.value': function (val) {
+            this.$store.commit('setCVExperienceRadio', val);
         }
     }
 }

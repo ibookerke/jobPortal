@@ -2,10 +2,17 @@
     <div>
         <v-row>
             <v-col>
-                <radio-button :label="labels.educationRadio"
-                              :radios="educationRadio.radios"
-                              v-model="educationRadio.value"
-                />
+                <v-radio-group v-model="educationRadio.value"
+                >
+                    <template>
+                        <div>{{ labels.educationRadio }}</div>
+                    </template>
+                    <v-radio v-for="(item, key) in educationRadio.radios"
+                             :label="item"
+                             :value="key"
+                             :key="key"
+                    ></v-radio>
+                </v-radio-group>
             </v-col>
         </v-row>
         <div v-if="educationRadio.value">
@@ -19,13 +26,10 @@
                     <v-label>Places of work</v-label>
                 </v-col>
                 <v-col>
-                    <education-dialog :user_id="user_id"
-                                       @newEducation="addEducation"
-                    />
+                    <education-dialog/>
                 </v-col>
             </v-row>
-            <education-cards :education="education"
-                             @deleteEducation="deleteEducation"/>
+            <education-cards/>
         </div>
     </div>
 </template>
@@ -42,12 +46,6 @@ export default {
         EducationDialog,
         RadioButton
     },
-    props: {
-        'user_id': {
-            type: Number,
-            required: true
-        }
-    },
     data() {
         return {
             educationRadio: {
@@ -59,29 +57,21 @@ export default {
                 value: null
             },
 
-            education: [],
-
             labels: {
                 educationRadio: 'Work education',
             },
         }
     },
-    methods: {
-        addEducation(value) {
-            this.education.push(value);
-        },
-
-        deleteEducation(value) {
-            this.education.splice(value, 1);
-        },
-
-
+    created() {
+        let get = this.$store.getters;
+        if (get.getCVEditType)
+        {
+            this.educationRadio.value = get.getCVEducation.length ? 1 : 0;
+        }
     },
     watch: {
-        education: function () {
-            if (this.educationRadio.value) {
-                this.$emit('input', this.education);
-            }
+        'educationRadio.value': function (val) {
+            this.$store.commit('setCVEducationRadio', val);
         }
     }
 }

@@ -91,7 +91,9 @@
         </v-row>
         <v-row>
             <v-col>
-                <VuePhoneNumberInput v-model="defaultPhone" @update="updatePhoneNumber" default-country-code="KZ"/>
+<!--                @update="updatePhoneNumber"-->
+<!--                v-model="defaultPhone"-->
+                <VuePhoneNumberInput v-model="profile.phone" default-country-code="KZ"/>
             </v-col>
         </v-row>
         <v-row>
@@ -147,17 +149,7 @@ export default {
     ],
     data() {
         return {
-            profile: {
-                user_id: null,
-                job_title: null,
-                firstname: null,
-                lastname: null,
-                date_of_birth: null,
-                gender: null,
-                phone: null,
-                salary: null,
-                currency: null
-            },
+            profile: {},
 
             labels: {
                 job_title: 'Job Title',
@@ -170,8 +162,8 @@ export default {
                 currency: 'Currency'
             },
 
-            // default number, since needs format from updatePhoneNumber()
-            defaultPhone: null,
+            // // default number, since needs format from updatePhoneNumber()
+            // defaultPhone: null,
 
             // current eligible age for work (14 years +)
             dateOfBirthMax: null,
@@ -255,10 +247,10 @@ export default {
         },
     },
     methods: {
-        // saves needed format of phone number
-        updatePhoneNumber(val) {
-            this.profile.phone = val.formattedNumber;
-        },
+        // // saves needed format of phone number
+        // updatePhoneNumber(val) {
+        //     this.profile.phone = val.formattedNumber;
+        // },
 
         // counts current eligible age for work
         eligibleAgeForWork() {
@@ -270,13 +262,13 @@ export default {
         }
     },
     created() {
-        this.profile.user_id = this.user_id;
+        this.profile = this.$store.getters.getCVProfile;
         this.dateOfBirthMax = this.eligibleAgeForWork();
     },
     watch: {
         profile: {
             handler: function (val) {
-                this.$emit('input', val);
+                this.$store.commit('setCVProfile', val);
             },
             deep: true
         }
