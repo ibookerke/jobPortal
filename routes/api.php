@@ -51,6 +51,12 @@ Route::group(['middleware' => ['jwt.verify'], ], function() {
     Route::post('/get_seeker_cvs', [CVController::class, 'getSeekerCVs']);
     Route::post('/delete_seeker_cv', [CVController::class, 'deleteCV']);
 
+    Route::post('/get_job_type_array', [\App\Http\Controllers\JobPostController::class, 'getJobTypeArray']);
+
+    Route::post('/get_countries', [\App\Http\Controllers\CountriesController::class, 'getCountries']);
+    Route::post('/get_states_by_country', [\App\Http\Controllers\StatesController::class, 'getStatesByCountry']);
+    Route::post('/get_cities_by_state', [\App\Http\Controllers\CitiesController::class, 'getCitiesByState']);
+
     Route::post('/get_skills', [\App\Http\Controllers\SkillsController::class, 'getSkills']);
     Route::post('/search_skills', [\App\Http\Controllers\SkillsController::class, 'searchSkills']);
 
