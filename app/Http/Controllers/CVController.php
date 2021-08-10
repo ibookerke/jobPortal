@@ -204,7 +204,7 @@ class CVController extends Controller
             $cv = $request['cv'];
             $cv_id = $cv['id'];
             $user_id = $cv['user_id'];
-            
+
             //checking if the data passed satisfies the validation requirements
             if (trim($cv['date_of_birth']) == null)
             {
