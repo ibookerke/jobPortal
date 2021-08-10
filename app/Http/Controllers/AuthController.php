@@ -61,7 +61,7 @@ class AuthController extends Controller{
             'user_type_id' => 'required|max:1|min:1'
         ]);
 
-        if($content->user_type_id != 1 || $content->user_type_id != 2) {
+        if($content->user_type_id != 1 && $content->user_type_id != 2) {
             return response()->json(["status" => "error", "message" => "Некорректный тип пользовталя"], 400);
         }
 
