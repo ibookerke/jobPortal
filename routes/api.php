@@ -40,6 +40,9 @@ Route::group(['middleware' => ['jwt.verify'], ], function() {
     Route::post("/updateCompany", [\App\Http\Controllers\CompanyController::class, "updateCompany"]);
     Route::get("/getCompany/{user_id}", [\App\Http\Controllers\CompanyController::class, "getCompany"]);
 
+    Route::post("/search_business_stream", [\App\Http\Controllers\BusinessStreamController::class, "search_business_stream"]);
+    Route::post("/get_business_stream", [\App\Http\Controllers\BusinessStreamController::class, "get_business_stream"]);
+
     Route::post("/getLocations", [\App\Http\Controllers\LocationController::class, "getLocations"]);
     Route::post("/saveLocation", [\App\Http\Controllers\LocationController::class, "saveLocation"]);
 
