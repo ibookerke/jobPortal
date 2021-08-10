@@ -20,4 +20,13 @@ class Controller extends BaseController
         return Cities::all();
     }
 
+    public function valid_check($object, $prop) {
+        if(trim($object->$prop) == "" || $object->$prop == null){
+            return false;
+        }
+        else{
+            return true;
+        }
+    }
+
 }

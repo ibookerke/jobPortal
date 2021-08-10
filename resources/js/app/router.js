@@ -76,12 +76,12 @@ const routes = [
         component: SaveCV
     },
     {
-        path: "edit_company",
+        path: "/edit_company",
         name: "edit_company",
         component: CompanyEditor
     },
     {
-        path: "edit_job_post",
+        path: "/edit_job_post",
         name: "edit_job_post",
         component: JobPostEditor
     },
