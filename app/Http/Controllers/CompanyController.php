@@ -27,7 +27,13 @@ class CompanyController extends Controller
         'profile_description' => "min:2",
         'establishment_date' => "nullable|min:10|max:10|date_format:Y-m-d|before:today",
         'company_website_url' => 'nullable|min:2|max:500|regex:/^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/',
-        'image' => 'nullable|min:2|max:255'
+        'image' => 'nullable|min:2|max:255',
+        'new_business' => "nullable|string"
+    ];
+
+    private $company_business_stream_rules = [
+        'company_id' => "required|numeric|min:1",
+        'business_stream_id' => "required|numeric|min:1"
     ];
 //'avatar' => 'nullable|max:10240|mimes:jpg,bmp,png'
 
@@ -123,6 +129,40 @@ class CompanyController extends Controller
                 $image->storeAs('/public/', $image_name);
             }
 
+            $removed_business = json_decode($request->removed_business);
+            $new_business = json_decode($request->new_business);
+
+            if(json_last_error() != JSON_ERROR_NONE) {
+                return response()->json(["status" => "error", "message" => "JSON validation error"], 400);
+            }
+
+            if(count($removed_business) > 0){
+                foreach ($removed_business as $record) {
+                    if(!property_exists($record, "cbs")){
+                        return response()->json(["status" => "error", "message" => "неправильный removed_business"], 400);
+                    }
+                    else{
+                        CompanyBusinessStream::where("id", "=", $record->cbs)->delete();
+                    }
+                }
+            }
+
+            foreach ($new_business as $record) {
+                if(!property_exists($record, "id")){
+                    return response()->json(["status" => "error", "message" => "неправильный removed_business"], 400);
+                }
+                else{
+                    $new_record["company_id"] = $company->id;
+                    $new_record["business_stream_id"] = $record->id;
+
+                    $val = Validator::make($new_record, $this->company_business_stream_rules);
+                    if($val->fails()){
+                        return response()->json(["status" => "error", "errors" => $validator->errors()], 400);
+                    }
+                    CompanyBusinessStream::insert($new_record);
+                }
+            }
+
             $company->save();
 
             return response()->json(["status" => "success", "message" => "Данные обновлены"], 200);
@@ -142,7 +182,7 @@ class CompanyController extends Controller
         $data = DB::table('company_business_stream')
             ->join('business_stream', "company_business_stream.business_stream_id", "=", "business_stream.id")
             ->join("companies", "company_business_stream.company_id", "=", "companies.id")
-            ->select('business_stream_id', 'business_stream_name')
+            ->select('business_stream.id', 'business_stream_name', "company_business_stream.id as cbs")
             ->get();
 
 

@@ -47,7 +47,7 @@
                         >
 
                             <v-img
-                                :src="!items[0].image ? profile_info : items[0].image"
+                                :src="!items[0].image ? profile_photo : items[0].image"
                                 id="ava"
                                 height="170px"
                                 width="170px"
@@ -99,13 +99,37 @@
                     <v-textarea
                         outlined
                         name="input-7-4"
-                        label="Outlined textarea"
+                        label="Описание"
                         rows="3"
                         auto-grow
                         v-model="company.profile_description"
                     ></v-textarea>
                 </v-col>
+            </v-row>
+            <v-row>
+                <v-col>
+                    <v-container>
+                        <v-row>
+                            <v-col>
+                                <h2>Сферы деятельности</h2>
+                            </v-col>
+                        </v-row>
+                        <v-combobox
+                            v-model="company.business_stream"
+                            :items="business_items"
+                            item-text="business_stream_name"
+                            item-value="id"
+                            :search-input.sync="search"
+                            hide-selected
+                            hint="до 10"
+                            multiple
+                            persistent-hint
+                            small-chips
+                        >
 
+                        </v-combobox>
+                    </v-container>
+                </v-col>
             </v-row>
 
 
@@ -125,28 +149,45 @@
 </template>
 
 <script>
-import company from "../../app/modules/company";
 
 export default {
     name: "CompanyEditor",
     data() {
         return {
             user: {},
-            company: {},
+            //company object
+            company: {
+                business_stream: null
+            },
+            //for showing the date picker card
             menu: false,
             transparent: 'rgba(255, 255, 255, 0)',
+            //storing the locally generated image
             avatar: null,
-            profile_info: null,
+            //storing the src to img file
+            profile_photo: null,
+            //in order to store the unsaved image
             items:[
                 {
                     image: false
                 }
-            ]
+            ],
+            //storing the possible business stream values
+            business_items:[],
+            //search value
+            search: null,
+            //storing existing business
+            removed_business: []
         }
     },
 
     methods: {
 
+        createCompany() {
+
+        },
+
+        //updating company data via api
         updateCompany() {
             let data = this.company
             let formData = new FormData()
@@ -156,7 +197,9 @@ export default {
             formData.append("establishment_date", data.establishment_date)
             formData.append("company_website_url", data.company_website_url)
             formData.append("image", data.image)
-            formData.append("avatar", this.avatar);
+            formData.append("avatar", this.avatar)
+            formData.append("removed_business", JSON.stringify(this.removed_business))
+            formData.append("new_business", JSON.stringify(this.company.business_stream))
 
             axios.post("/api/updateCompany", formData, {
                 headers: {
@@ -173,11 +216,12 @@ export default {
                 console.log(err.response)
             })
         },
-
+        //calling the file picker input
         previewFiles() {
             document.getElementById('photo').click()
         },
 
+        //getting file and validation
         onFileChange(item, e) {
             var files = e.target.files || e.dataTransfer.files;
             if (!files.length)
@@ -193,6 +237,7 @@ export default {
                 }
             }
         },
+
         //creates local url for previewing avatar
         createImage(item, file) {
             var image = new Image();
@@ -209,27 +254,88 @@ export default {
             reader.readAsDataURL(file);
         },
 
+        //getting the business stream possible values
+        getBusinessStream() {
+            axios.post(
+                '/api/get_business_stream',
+                {},
+                {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.token}`
+                    }
+                }
+            ).then(response => {
+                this.business_items = response.data;
+            }).catch(error => {
+                console.log(error.response.data);
+            });
+        },
+        //searching for business stream values in db
+        searchBusinessStream(val) {
+            axios.post(
+                '/api/search_business_stream',
+                {
+                    'search': val
+                },
+                {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.token}`
+                    }
+                }
+            ).then(response => {
+                this.business_items = response.data;
+            }).catch(error => {
+                console.log(error.response.data);
+            });
+        }
     },
 
     created() {
+        this.getBusinessStream()
+
         this.user = this.$store.getters.getUserData
         //checking if the company data is loaded
         if(this.$store.getters.getCompanyLoadStatus){
+            //getting company data
+
             this.company = this.$store.getters.getCompanyData
+            this.removed_business = this.company.business_stream
             //checking if the company avatar is set
             if(this.company.image === null){
                 //if not using the default picture
-                this.profile_info = './storage/default.jpg'
+                this.profile_photo = './storage/default.jpg'
             }
             else{
                 //if set getting the picture from storage
-                this.profile_info = './storage/' + this.user.id + '_' + this.company.image
+                this.profile_photo = './storage/' + this.user.id + '_' + this.company.image
             }
         }
         else{
             this.$router.push({name: "profile"})
         }
-    }
+    },
+    watch: {
+        company (val, old) {
+            if(old.business_stream){
+                if(val.business_stream.length !== old.business_stream.length){
+                    if (val.business_stream.length > 10) {
+                        this.$nextTick(() => this.company.business_stream.pop());
+                    }
+                }
+            }
+        },
+        search (val) {
+            if (val !== null && val !== '')
+            {
+                if (val.length > 1) {
+                    this.searchBusinessStream(val);
+                }
+            }
+            else {
+                this.getBusinessStream();
+            }
+        }
+    },
 
 }
 </script>
