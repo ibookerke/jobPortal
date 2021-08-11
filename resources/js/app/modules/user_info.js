@@ -56,7 +56,6 @@ export default {
                     "Authorization" : "Bearer " + token
                 }
             })
-
             commit("userLogOut")
         }
     },

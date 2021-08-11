@@ -13,6 +13,10 @@ import MyJobPosts from "../components/company/MyJobPosts";
 import SaveCV from "../components/seeker/CVEditor/SaveCV";
 import CompanyEditor from "../components/company/CompanyEditor";
 import JobPostEditor from "../components/company/JobPostEditor";
+import Companies from "../components/company/Companies";
+import JobPosts from "../components/company/JobPosts";
+import CVs from "../components/seeker/CVs";
+import CV from "../components/seeker/CV";
 
 Vue.use(VueRouter)
 
@@ -32,6 +36,7 @@ var access = {
     save_cv: 2,
     edit_company: 1,
     edit_job_post: 1,
+    cvs: 1,
 
 
     profile: 0,
@@ -84,6 +89,36 @@ const routes = [
         path: "/edit_job_post",
         name: "edit_job_post",
         component: JobPostEditor
+    },
+    {
+        path: "/companies",
+        name: "companies",
+        component: Companies
+    },
+    // {
+    //     path: "/companies/:id",
+    //     name: "company_id",
+    //     component: Companies
+    // },
+    {
+        path: "/job_posts",
+        name: "job_posts",
+        component: JobPosts
+    },
+    // {
+    //     path: "/job_posts/:id",
+    //     name: "job_post_id",
+    //     component: JobPosts
+    // },
+    {
+        path: "/cvs",
+        name: "cvs",
+        component: CVs
+    },
+    {
+        path: "/cvs/:id",
+        name: "cv",
+        component: CV
     },
 
 
