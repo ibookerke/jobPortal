@@ -18,7 +18,7 @@ class CVController extends Controller
     private $create_rules = [
         'experience' => [
             'user_id' => "required|numeric|min:1",
-            'cv_id' => "nullable|numeric|min:1",
+            'cv_id' => "required|numeric|min:1",
             'is_current_job' => "required|numeric|min:0",
             'start_date' => "required|date|date_format:Y-m-d|before:today",
             'end_date' => "nullable|date|date_format:Y-m-d|after:start_date|before:today",

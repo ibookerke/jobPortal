@@ -51,7 +51,11 @@ Route::group(['middleware' => ['jwt.verify'], ], function() {
     Route::post('/get_seeker_cvs', [CVController::class, 'getSeekerCVs']);
     Route::post('/delete_seeker_cv', [CVController::class, 'deleteCV']);
 
+    Route::post('/get_all_vacancies', [\App\Http\Controllers\JobPostController::class, 'getAllVacancies']);
     Route::post('/get_job_type_array', [\App\Http\Controllers\JobPostController::class, 'getJobTypeArray']);
+    Route::post('/get_work_experience_array', [\App\Http\Controllers\JobPostController::class, 'getWorkExperienceArray']);
+    Route::post('/create_job_post', [\App\Http\Controllers\JobPostController::class, 'createJobPost']);
+    Route::post('/update_job_post', [\App\Http\Controllers\JobPostController::class, 'updateJobPost']);
 
     Route::post('/get_countries', [\App\Http\Controllers\CountriesController::class, 'getCountries']);
     Route::post('/get_states_by_country', [\App\Http\Controllers\StatesController::class, 'getStatesByCountry']);

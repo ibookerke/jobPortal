@@ -93,6 +93,15 @@ export default {
                 this.loading = newValue
                 if(!newValue) {
                     this.user = this.$store.getters.getUserData
+                    if (this.user.user_type_id === 1)
+                    {
+                        let user_data = {
+                            id: this.user.id,
+                            token : localStorage.getItem("token")
+                        }
+
+                        this.$store.dispatch("loadCompany", user_data)
+                    }
                 }
             }
         )
