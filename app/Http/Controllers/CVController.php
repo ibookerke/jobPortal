@@ -10,6 +10,7 @@ use App\Models\Experience;
 use App\Models\SeekerSkills;
 use App\Models\Skills;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use stdClass;
 
@@ -37,7 +38,7 @@ class CVController extends Controller
             'cgpa' => "nullable|min:1|max:255"
         ],
         'skills' => [
-            'name' => "required|min:2|max:255"
+            'name' => "required|max:255"
         ]
     ];
 
@@ -82,13 +83,58 @@ class CVController extends Controller
         }
     }
 
+    public function getCvs(){
+        try{
+            $data = CVs::get();
+            $education = Education::get();
+            $experience = Experience::get();
+            $skills = DB::table('seeker_skills')
+                ->join('skills', 'seeker_skills.skill_id', '=', 'skills.id')
+                ->select('skills.*', "seeker_skills.cv_id")
+                ->get();
+
+
+            foreach ($data as $cv){
+                $cv_edu = [];
+                foreach ($education as $edu){
+                    if($edu->cv_id == $cv->id){
+                        array_push($cv_edu, $edu);
+                    }
+                }
+                $cv_exp = [];
+                foreach ($experience as $exp){
+                    if($exp->cv_id == $cv->id){
+                        array_push($cv_exp, $exp);
+                    }
+                }
+                $cv_skills = [];
+                foreach ($skills as $sk){
+                    if($sk->cv_id == $cv->id){
+                        array_push($cv_skills, $sk);
+                    }
+                }
+
+                $cv->educations = $cv_edu;
+                $cv->experiences = $cv_exp;
+                $cv->skills = $cv_skills;
+            }
+            return $data;
+        }
+        catch (\Exception $e) {
+            return response()->json(["status" => "error", "message" =>  $e->getMessage(). " " . $e->getFile() . " LINE:" . $e->getLine()], 400);
+        }
+    }
+
     public function createCV(Request $request)
     {
         try
         {
+
             //checking if the request body is filled correctly
             $content = json_decode($request->getContent());
             if(json_last_error() != JSON_ERROR_NONE)
+
+            return response()->json(["message" => $content], 400);
             {
                 return response()->json(["status" => "error", "message" => "JSON validation error"], 400);
             }

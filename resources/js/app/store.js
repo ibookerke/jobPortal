@@ -6,16 +6,33 @@ import schema from "./modules/schema";
 import cvstorage from "./modules/cvstorage"
 import jobStorage from "./modules/jobStorage"
 import company from "./modules/company"
+import grid from "./modules/grid";
 
 Vue.use(Vuex)
 
 const store = new Vuex.Store({
+    state:{
+        search: ""
+    },
+    mutations:{
+        setSearch(state, value){
+            state.search = value
+        }
+    },
+
+    getters:{
+        getSearch(state) {
+            return state.search
+        }
+    },
+
     modules: {
         user_info,
         schema,
         cvstorage,
         company,
-        jobStorage
+        jobStorage,
+        grid
     }
 })
 
