@@ -136,7 +136,7 @@ import 'vue-phone-number-input/dist/vue-phone-number-input.css';
 
 // validation
 import { validationMixin } from 'vuelidate';
-import { required, minLength, maxLength } from 'vuelidate/lib/validators';
+import {required, minLength, maxLength, integer, minValue, maxValue} from 'vuelidate/lib/validators';
 
 export default {
     mixins: [validationMixin],
@@ -200,8 +200,9 @@ export default {
                 maxLength: maxLength(255)
             },
             salary: {
-                minLength: minLength(1),
-                maxLength: maxLength(255)
+                integer,
+                minValue: minValue(0),
+                maxValue: maxValue(2147483647)
             },
         }
     },
@@ -242,7 +243,9 @@ export default {
         salaryErrors () {
             const errors = [];
             if (!this.$v.profile.salary.$dirty) return errors;
-            !this.$v.profile.salary.maxLength && errors.push(this.labels.salary + 'must be at most 255 characters long');
+            !this.$v.profile.salary.minValue && errors.push('Salary must be positive');
+            !this.$v.profile.salary.maxValue && errors.push('Salary must be lower than 2147483647');
+            !this.$v.profile.salary.integer && errors.push('Salary must be an integer');
             return errors;
         },
     },

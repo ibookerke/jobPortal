@@ -1,6 +1,7 @@
 <template>
     <v-form ref="cv_form"
             lazy-validation
+            style="margin-bottom: 140px !important"
     >
         <v-container>
             <v-row>

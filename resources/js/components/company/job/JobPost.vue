@@ -76,7 +76,7 @@
 <script>
 // validation
 import { validationMixin } from 'vuelidate';
-import { required, minLength, maxLength, minValue, integer } from 'vuelidate/lib/validators';
+import { required, minLength, maxLength, minValue, integer, maxValue } from 'vuelidate/lib/validators';
 
 export default {
     mixins: [validationMixin],
@@ -145,7 +145,8 @@ export default {
             },
             salary: {
                 integer,
-                minValue: minValue(0)
+                minValue: minValue(0),
+                maxValue: maxValue(2147483647)
             },
             work_experience_type: {
                 required
@@ -172,6 +173,7 @@ export default {
         salaryErrors () {
             const errors = [];
             if (!this.$v.jobPost.salary.$dirty) return errors;
+            !this.$v.jobPost.salary.maxValue && errors.push('Salary must be lower than 2147483647');
             !this.$v.jobPost.salary.minValue && errors.push('Salary must be positive');
             !this.$v.jobPost.salary.integer && errors.push('Salary must be an integer');
             return errors;
