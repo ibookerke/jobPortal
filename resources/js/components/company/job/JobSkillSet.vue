@@ -13,7 +13,7 @@
             :search-input.sync="search"
             hide-selected
             hint="Maximum of 30 tags"
-            label="Add some tags"
+            label="Add some skills"
             multiple
             persistent-hint
             small-chips
@@ -34,11 +34,20 @@
 <script>
 export default {
     name: "JobSkillSet",
+    props: ['editType'],
     data() {
         return {
             model: [],
             items: [],
-            search: null
+            search: null,
+            stopSearch: false
+        }
+    },
+    created() {
+        this.getSkills();
+        if (!this.editType)
+        {
+            this.model = this.$store.getters.getJPSkills;
         }
     },
     methods: {
@@ -74,28 +83,42 @@ export default {
                 console.log(error.response.data);
             });
         },
-        watch: {
-            model (val, old) {
-                if (val.length > 30) {
-                    this.$nextTick(() => this.model.pop());
-                }
-                // this.$store.commit('setCVSkills', val);
-            },
-            search (val) {
-                if (val !== null && val !== '')
+    },
+    watch: {
+        model (val, old) {
+            if (val.length > 30) {
+                this.$nextTick(() => this.model.pop());
+            }
+            this.$store.commit('setJPSkills', val);
+        },
+        search (val, old) {
+            if (val !== null && val !== '')
+            {
+                if (val.length > 1)
                 {
-                    if (val.length > 1)
+                    if (!this.stopSearch)
                     {
                         this.searchSkills(val);
+                        if (!this.items.length)
+                        {
+                            this.stopSearch = true;
+                        }
+                    }
+                    else
+                    {
+                        if (!(old.length < val.length) && !val.substring(0, old.val) === old)
+                        {
+                            this.stopSearch = false;
+                        }
                     }
                 }
-                else
-                {
-                    this.getSkills();
-                }
             }
-        },
-    }
+            else
+            {
+                this.getSkills();
+            }
+        }
+    },
 }
 </script>
 

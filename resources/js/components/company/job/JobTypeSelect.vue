@@ -2,21 +2,17 @@
     <div>
         <v-row>
             <v-col>
-                <h2>Job Type</h2>
-            </v-col>
-        </v-row>
-        <v-row>
-            <v-col>
-                <v-combobox
+                <v-select
                     v-model="select"
                     :items="items"
                     item-text="name"
                     item-value="id"
-                    label="Combobox"
+                    label="Job Type"
                     multiple
                     outlined
                     dense
-                ></v-combobox>
+                    return-object
+                ></v-select>
             </v-col>
         </v-row>
     </div>
@@ -25,6 +21,7 @@
 <script>
 export default {
     name: "JobType",
+    props: ['editType'],
     data() {
         return {
             items: [],
@@ -32,27 +29,35 @@ export default {
         }
     },
     created() {
-        axios.post(
-            '/api/get_job_type_array',
-            {
-            },
-            {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.token}`
-                }
-            }
-        ).
-        then(response => {
-            console.log(response.data)
-            this.items = response.data;
-        }).
-        catch(error => {
-            console.log(error.response.data);
-        });
+        this.getJobTypeArray();
+        if (!this.editType)
+        {
+            this.select = this.$store.getters.getJPJobTypes;
+        }
     },
     watch: {
-        select: function (val) {
-            this.$store.commit('setJPJobTypeArray', val);
+        select: function (value) {
+            this.$store.commit('setJPJobTypes', value);
+        }
+    },
+    methods: {
+        getJobTypeArray() {
+            axios.post(
+                '/api/get_job_type_array',
+                {
+                },
+                {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.token}`
+                    }
+                }
+            ).
+            then(response => {
+                this.items = response.data;
+            }).
+            catch(error => {
+                console.log(error.response.data);
+            });
         }
     }
 }
