@@ -38,6 +38,7 @@ export default {
         items: [],
         model: [],
         search: null,
+        stopSearch: false
     }),
     methods: {
         getSkills() {
@@ -87,12 +88,26 @@ export default {
             }
             this.$store.commit('setCVSkills', val);
         },
-        search (val) {
+        search (val, old) {
             if (val !== null && val !== '')
             {
                 if (val.length > 1)
                 {
-                    this.searchSkills(val);
+                    if (!this.stopSearch)
+                    {
+                        this.searchSkills(val);
+                        if (!this.items.length)
+                        {
+                            this.stopSearch = true;
+                        }
+                    }
+                    else
+                    {
+                        if (!(old.length < val.length) && !val.substring(0, old.val) === old)
+                        {
+                            this.stopSearch = false;
+                        }
+                    }
                 }
             }
             else

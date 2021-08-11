@@ -153,10 +153,7 @@
                 </v-col>
             </v-row>
 
-
-
         </v-form>
-        <pre>{{company}}</pre>
 
     </v-card>
 </template>

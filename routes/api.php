@@ -67,6 +67,9 @@ Route::group(['middleware' => ['jwt.verify'], ], function() {
     Route::post("/createEvent", [\App\Http\Controllers\EventController::class, "create_event"]);
 
     Route::post("/uploadAvatar", [\App\Http\Controllers\CompanyController::class, "uploadAvatar"]);
+
+    Route::post("/getCVs", [CVController::class, "getCvs"]);
+
 });
 
 Route::get("/get_cities", [\App\Http\Controllers\Controller::class, "get_cities"]);
