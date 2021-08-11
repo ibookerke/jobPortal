@@ -46,7 +46,7 @@
                     <div class="right">
                         <h1 class="text-capitalize mb-4">{{company.company_name}}</h1>
                         <hr class="mb-2">
-                        <p>
+                        <p v-if="company.establishment_date !== null">
                             <span class="font-weight-bold">Дата основания: </span>{{company.establishment_date}}
                         </p>
                         <p class="font-weight-bold">Описание</p>
@@ -91,7 +91,6 @@ export default {
     },
 
     created() {
-        console.log("created")
         this.user = this.user_info
         if(this.$store.getters.getCompanyLoadStatus){
             this.company = this.$store.getters.getCompanyData
