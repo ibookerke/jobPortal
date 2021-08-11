@@ -1,7 +1,8 @@
 export default {
     state: {
         company_loaded: false,
-        company: {}
+        company: {},
+        createActionCompany: false,
     },
     mutations: {
         setCompanyData(state, company_data) {
@@ -12,6 +13,9 @@ export default {
         },
         setCompanyStatusLoad(state) {
             state.company_loaded = true
+        },
+        setCreateActionCompany(state) {
+            state.createActionCompany = true
         }
     },
     actions: {
@@ -26,8 +30,14 @@ export default {
                 // }, 2000)
                 console.log("company loaded: ", response)
                 commit("setCompanyStatusLoad")
-                commit("setCompanyData", response.data.company)
-                commit("setCompanyBusinessStreamData", response.data.business_stream)
+
+                if(response.data.company === null) {
+                    commit("setCreateActionCompany")
+                }
+                else{
+                    commit("setCompanyData", response.data.company)
+                    commit("setCompanyBusinessStreamData", response.data.business_stream)
+                }
 
             }).catch(err => {
                 console.log(err.response)
@@ -40,6 +50,9 @@ export default {
         },
         getCompanyData(state) {
             return state.company
+        },
+        getCreateActionCompany(state) {
+            return state.createActionCompany
         }
     }
 }
