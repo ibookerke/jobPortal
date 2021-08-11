@@ -122,11 +122,13 @@ export default {
                 "user_type_id" : this.user_type_id
 
             }).then(response => {
+                console.log(response)
                 if(response.status === 201) {
                     alert("Пользователь успешно создан")
                     this.$router.push({name: "login"})
                 }
             }).catch(error=> {
+                console.log(error.response)
                 if(error.response){
                     this.error = "Форма заполнена с ошибками"
                 }

@@ -21,8 +21,7 @@ class CreateCompaniesTable extends Migration
 
             $table->string('company_name', 100);
             $table->text('profile_description');
-            $table->unsignedBigInteger('business_stream_id')->unsigned();
-            $table->foreign("business_stream_id")->references('id')->on("business_stream");
+
             $table->date('establishment_date')->nullable();
             $table->string('company_website_url', 500)->nullable();
             $table->string("image", 255)->nullable();

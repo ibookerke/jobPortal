@@ -7,8 +7,7 @@
             ></v-progress-linear>
         </div>
         <div v-else>
-            <h1 v-if="this.company === null">Компания отсутствует у пользователя</h1>
-            <div v-else-if="this.company.id">
+            <div v-if="editAction">
                 <section class="d-flex justify-space-around pt-8 flex-wrap">
                     <div class="left d-flex flex-column">
                         <div>
@@ -16,7 +15,7 @@
                             <img v-else :src="'./storage/' + user.id + '_' + company.image" alt="">
                         </div>
 
-                        <div>
+                        <div v-if="company.company_website_url">
                             <a class="deep-purple--text" :href="company.company_website_url" v-if="company.company_website_url.length <= 30">
                                 {{company.company_website_url}}
                             </a>
@@ -25,7 +24,7 @@
                             </a>
                         </div>
 
-                        <div>
+                        <div v-if="company.business_stream.length > 0">
                             <p class="font-weight-bold mb-0">Сферы деятельности:</p>
                             <p>
                             <span v-for="(stream, index) in company.business_stream">
@@ -56,6 +55,16 @@
                     </div>
                 </section>
             </div>
+            <div v-else>
+                <v-card width="80%" class="mx-auto my-6 pa-6">
+                    <h1>
+                        Вы еще не зарегистрировали компанию
+                    </h1>
+                    <v-btn color="primary" @click="$router.push({name: 'edit_company'})">
+                        Создать
+                    </v-btn>
+                </v-card>
+            </div>
         </div>
     </div>
 </template>
@@ -67,7 +76,8 @@ export default {
         return {
             user: {},
             company: {},
-            loading: true
+            loading: true,
+            editAction: true
         }
     },
     props: [
@@ -81,29 +91,48 @@ export default {
     },
 
     created() {
+        console.log("created")
         this.user = this.user_info
         if(this.$store.getters.getCompanyLoadStatus){
             this.company = this.$store.getters.getCompanyData
+            this.editAction = !this.$store.getters.getCreateActionCompany
             this.loading = false
         }
         else{
+            this.loadCompanyData()
+        }
+    },
+
+    methods: {
+        loadCompanyData(){
             let user_data = {
                 id: this.user.id,
                 token : localStorage.getItem("token")
             }
 
             this.$store.dispatch("loadCompany", user_data)
+
             this.unwatch = this.$store.watch(
                 (state, getters) => getters.getCompanyLoadStatus,
                 (newValue, oldValue) => {
                     if(newValue) {
                         this.company = this.$store.getters.getCompanyData
                         this.loading = false
+
+                        if(this.company.id){
+                            //update mode
+                            this.editAction = true
+                        }
+                        else{
+                            //create mode
+                            this.editAction = false
+                            this.$store.commit("setCreateActionCompany")
+                        }
                     }
                 }
             )
         }
-    },
+    }
 }
 </script>
 

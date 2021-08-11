@@ -133,13 +133,27 @@
             </v-row>
 
 
-            <v-btn
-                class="mb-4"
-                color="success"
-                @click="updateCompany"
-            >
-                Сохранить
-            </v-btn>
+            <v-row>
+                <v-col>
+                    <v-btn
+                        v-if="!actionCreate"
+                        class="mb-4"
+                        color="success"
+                        @click="updateCompany"
+                    >
+                        Сохранить
+                    </v-btn>
+                    <v-btn
+                        v-else
+                        class="mb-4"
+                        color="success"
+                        @click="createCompany"
+                    >
+                        Сохранить
+                    </v-btn>
+                </v-col>
+            </v-row>
+
 
 
         </v-form>
@@ -155,17 +169,23 @@ export default {
     data() {
         return {
             user: {},
+
             //company object
             company: {
                 business_stream: null
             },
+
             //for showing the date picker card
             menu: false,
+
             transparent: 'rgba(255, 255, 255, 0)',
+
             //storing the locally generated image
             avatar: null,
+
             //storing the src to img file
             profile_photo: null,
+
             //in order to store the unsaved image
             items:[
                 {
@@ -177,45 +197,80 @@ export default {
             //search value
             search: null,
             //storing existing business
-            removed_business: []
+            removed_business: [],
+            //shows the action type
+            actionCreate: false,
         }
     },
 
     methods: {
+        updateCompany() {
+            // let data = this.company
+            // let formData = new FormData()
+            // formData.append("user_id", data.user_id)
+            // formData.append("company_name", data.company_name)
+            // formData.append("profile_description", data.profile_description)
+            // formData.append("establishment_date", data.establishment_date)
+            // formData.append("company_website_url", data.company_website_url)
+            // formData.append("image", data.image)
+            // formData.append("avatar", this.avatar)
+            // formData.append("removed_business", JSON.stringify(this.removed_business))
+            // formData.append("new_business", JSON.stringify(this.company.business_stream))
+            //
+            // axios.post("/api/updateCompany", formData, {
+            //     headers: {
+            //         'Content-Type': 'multipart/form-data',
+            //         "Authorization" : "Bearer " + localStorage.getItem("token")
+            //     }
+            // }).then(response => {
+            //     if(response.status === 200){
+            //         this.$router.push({name: "profile"})
+            //         this.$store.commit("setCompanyData", this.company)
+            //     }
+            //
+            // }).catch(err => {
+            //     console.log(err.response)
+            // })
+
+            console.log("update")
+        },
 
         createCompany() {
-
-        },
-
-        //updating company data via api
-        updateCompany() {
-            let data = this.company
-            let formData = new FormData()
-            formData.append("user_id", data.user_id)
-            formData.append("company_name", data.company_name)
-            formData.append("profile_description", data.profile_description)
-            formData.append("establishment_date", data.establishment_date)
-            formData.append("company_website_url", data.company_website_url)
-            formData.append("image", data.image)
-            formData.append("avatar", this.avatar)
-            formData.append("removed_business", JSON.stringify(this.removed_business))
-            formData.append("new_business", JSON.stringify(this.company.business_stream))
-
-            axios.post("/api/updateCompany", formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
+            this.company.user_id = this.user.id
+            axios.post("/api/createCompany", this.company, {
+                headers:{
                     "Authorization" : "Bearer " + localStorage.getItem("token")
                 }
-            }).then(response => {
-                if(response.status === 200){
-                    this.$router.push({name: "profile"})
-                    this.$store.commit("setCompanyData", this.company)
-                }
+            }).then(response=> {
+                console.log('create', response)
+                this.$store.commit("setCompanyData", this.company)
+                this.image_upload()
 
-            }).catch(err => {
-                console.log(err.response)
+            }).catch(err=> {
+                console.log('create', err.response)
             })
+
         },
+
+        image_upload() {
+            //uploading image
+            let formData = new FormData()
+            formData.append("user_id", this.user.id)
+            if(this.avatar){
+                formData.append("avatar", this.avatar)
+                axios.post("api/uploadAvatar", formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                        "Authorization" : "Bearer " + localStorage.getItem("token")
+                    }
+                }).then(response=> {
+                    console.log("upload", response)
+                }).catch(err=>{
+                    console.log("upload", err.response)
+                })
+            }
+        },
+
         //calling the file picker input
         previewFiles() {
             document.getElementById('photo').click()
@@ -296,18 +351,16 @@ export default {
         this.user = this.$store.getters.getUserData
         //checking if the company data is loaded
         if(this.$store.getters.getCompanyLoadStatus){
-            //getting company data
-
-            this.company = this.$store.getters.getCompanyData
-            this.removed_business = this.company.business_stream
-            //checking if the company avatar is set
-            if(this.company.image === null){
-                //if not using the default picture
-                this.profile_photo = './storage/default.jpg'
+            this.actionCreate = this.$store.getters.getCreateActionCompany
+            //check if the action create or not
+            if(this.$store.getters.getCreateActionCompany) {
+                // action create
+                console.log("action create")
+                this.actionCreate = true
             }
             else{
-                //if set getting the picture from storage
-                this.profile_photo = './storage/' + this.user.id + '_' + this.company.image
+                //setting the data to delete
+                this.removed_business = this.$store.getters.getCompanyData.business_stream
             }
         }
         else{
