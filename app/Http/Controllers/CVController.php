@@ -266,7 +266,7 @@ class CVController extends Controller
                 'date_of_birth' => "nullable|date_format:Y-m-d|before:" . $eligible_for_work_age,
                 'gender' => "nullable|numeric|min:0",
                 'phone' => "nullable|min:2|max:20",
-                'salary' => "nullable|min:2|max:255",
+                'salary' => 'nullable|numeric',
                 'currency' => "nullable|min:2|max:50"
             ]);
             if ($validator->fails())

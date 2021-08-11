@@ -59,8 +59,7 @@ export default {
                 date_of_birth: null,
                 gender: null,
                 phone: null,
-                salary: null,
-                currency: null
+                salary: null
             };
         },
         setCVTypeEdit(state) {
