@@ -126,7 +126,6 @@
                             persistent-hint
                             small-chips
                         >
-
                         </v-combobox>
                     </v-container>
                 </v-col>
@@ -169,23 +168,17 @@ export default {
     data() {
         return {
             user: {},
-
             //company object
             company: {
                 business_stream: null
             },
-
             //for showing the date picker card
             menu: false,
-
             transparent: 'rgba(255, 255, 255, 0)',
-
             //storing the locally generated image
             avatar: null,
-
             //storing the src to img file
             profile_photo: null,
-
             //in order to store the unsaved image
             items:[
                 {
@@ -205,34 +198,22 @@ export default {
 
     methods: {
         updateCompany() {
-            // let data = this.company
-            // let formData = new FormData()
-            // formData.append("user_id", data.user_id)
-            // formData.append("company_name", data.company_name)
-            // formData.append("profile_description", data.profile_description)
-            // formData.append("establishment_date", data.establishment_date)
-            // formData.append("company_website_url", data.company_website_url)
-            // formData.append("image", data.image)
-            // formData.append("avatar", this.avatar)
-            // formData.append("removed_business", JSON.stringify(this.removed_business))
-            // formData.append("new_business", JSON.stringify(this.company.business_stream))
-            //
-            // axios.post("/api/updateCompany", formData, {
-            //     headers: {
-            //         'Content-Type': 'multipart/form-data',
-            //         "Authorization" : "Bearer " + localStorage.getItem("token")
-            //     }
-            // }).then(response => {
-            //     if(response.status === 200){
-            //         this.$router.push({name: "profile"})
-            //         this.$store.commit("setCompanyData", this.company)
-            //     }
-            //
-            // }).catch(err => {
-            //     console.log(err.response)
-            // })
-
-            console.log("update")
+            this.company.user_id = this.user.id
+            this.company.removed_business = this.removed_business
+            axios.post("/api/updateCompany", this.company, {
+                headers:{
+                    "Authorization" : "Bearer " + localStorage.getItem("token")
+                }
+            }).then(response=> {
+                if(response.status === 201){
+                    this.image_upload()
+                    this.$store.commit("setCompanyData", this.company)
+                    this.removed_business = []
+                    this.$router.push({name : "profile"})
+                }
+            }).catch(err=> {
+                console.log('update', err.response)
+            })
         },
 
         createCompany() {
@@ -242,14 +223,14 @@ export default {
                     "Authorization" : "Bearer " + localStorage.getItem("token")
                 }
             }).then(response=> {
-                console.log('create', response)
-                this.$store.commit("setCompanyData", this.company)
-                this.image_upload()
-
+                if(response.status === 201){
+                    this.image_upload()
+                    this.$store.commit("setCompanyData", this.company)
+                    this.$router.push({name : "profile"})
+                }
             }).catch(err=> {
                 console.log('create', err.response)
             })
-
         },
 
         image_upload() {
@@ -264,7 +245,7 @@ export default {
                         "Authorization" : "Bearer " + localStorage.getItem("token")
                     }
                 }).then(response=> {
-                    console.log("upload", response)
+
                 }).catch(err=>{
                     console.log("upload", err.response)
                 })
@@ -360,6 +341,8 @@ export default {
             }
             else{
                 //setting the data to delete
+                this.company = this.$store.getters.getCompanyData
+                this.profile_photo = this.company.image ? "./storage/" + this.user.id + "_" + this.company.image : "./storage/default.jpg"
                 this.removed_business = this.$store.getters.getCompanyData.business_stream
             }
         }

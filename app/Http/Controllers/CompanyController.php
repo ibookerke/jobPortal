@@ -52,11 +52,6 @@ class CompanyController extends Controller
                 return response()->json(["status" => "error", "message" => "Ошибки валидации", "errors" => $validator->errors()], 400);
             }
 
-            $user = User::where("id", "=", $content->user_id)->first();
-            if($user->user_type_id !== 1) {
-                return response()->json(["statue" => "error", "message" => "Только работодатель может созадвать компанию"]);
-            }
-
             $company["company_name"] = $content->company_name;
             $company["user_id"] = $content->user_id;
             $company["profile_description"] = $content->profile_description;
@@ -143,60 +138,46 @@ class CompanyController extends Controller
 
     public function updateCompany(Request $request) {
         try{
+            //checking if the request body is filled correctly
+            $content = json_decode($request->getContent());
+            if(json_last_error() != JSON_ERROR_NONE){
+                return response()->json(["status" => "error", "message" => "Ошибка валидации JSON"], 400);
+            }
+
             //checking if the data passed satisfies the validation requirements
             $validator = Validator::make($request->all(), $this->update_rules);
             if($validator->fails()){
-                return response()->json(["status" => "error", "errors" => $validator->errors()], 400);
+                return response()->json(["status" => "error", "message" => "Ошибки валидации", "errors" => $validator->errors()], 400);
             }
 
-            //getting an existing user
-            $company = Company::where("user_id", "=", $request->user_id)
-                ->first();
+            $company["company_name"] = $content->company_name;
+            $company["user_id"] = $content->user_id;
+            $company["profile_description"] = $content->profile_description;
 
-            //check if there is a company
-            if(is_null($company)) {
-                return response()->json(["status" => "error", "message" => "Компания соответсвтующая пользователю не найдена"], 400);
+            if(property_exists($content, "establishment_date")){
+                $company["establishment_date"] = $content->establishment_date;
+            }
+            else{
+                $company["establishment_date"] = null;
             }
 
-            if($this->valid_check($request, "company_name")){
-                $company->image = $request->company_name;
+            if(property_exists($content, "company_website_url")){
+                $company["company_website_url"] = $content->company_website_url;
+            }
+            else{
+                $company["company_website_url"] = null;
             }
 
-            if($this->valid_check($request, "profile_description")){
-                $company->profile_description = $request->profile_description;
+            if(property_exists($content, "image")){
+                $company["image"] = $content->image;
+            }
+            else{
+                $company["image"] = null;
             }
 
-            if($this->valid_check($request, "establishment_date")){
-                $company->establishment_date = $request->establishment_date;
-            } else{
-                $company->establishment_date = null;
-            }
+            Company::where('id', "=", $content->id)->update($company);
 
-            if($this->valid_check($request, "company_website_url")){
-                $company->company_website_url = $request->company_website_url;
-            } else{
-                $company->company_website_url = null;
-            }
-
-            if($this->valid_check($request, "image")){
-                $company->image = $request->image;
-            }else{
-                $company->image = null;
-            }
-
-//            if($request->hasFile('avatar')){
-//                $image = $request->file('avatar');
-//                $image_name = $request->user_id . "_" . $image->getClientOriginalName();
-//
-//                $image->storeAs('/public/', $image_name);
-//            }
-
-            $removed_business = json_decode($request->removed_business);
-            $new_business = json_decode($request->new_business);
-
-            if(json_last_error() != JSON_ERROR_NONE) {
-                return response()->json(["status" => "error", "message" => "JSON validation error"], 400);
-            }
+            $removed_business = $content->removed_business;
 
             if(count($removed_business) > 0){
                 foreach ($removed_business as $record) {
@@ -209,25 +190,21 @@ class CompanyController extends Controller
                 }
             }
 
-            foreach ($new_business as $record) {
-                if(!property_exists($record, "id")){
-                    return response()->json(["status" => "error", "message" => "неправильный removed_business"], 400);
-                }
-                else{
-                    $new_record["company_id"] = $company->id;
-                    $new_record["business_stream_id"] = $record->id;
+            foreach ($content->business_stream as $record){
+                $new_record["business_stream_id"] = $record->id;
+                $new_record["company_id"] = $content->id;
 
-                    $val = Validator::make($new_record, $this->company_business_stream_rules);
-                    if($val->fails()){
-                        return response()->json(["status" => "error", "errors" => $validator->errors()], 400);
-                    }
-                    CompanyBusinessStream::insert($new_record);
+                $vali = Validator::make($new_record, $this->company_business_stream_rules);
+
+                if($vali->fails()){
+                    return response()->json(["status" => "error", "message" => $vali->errors()]);
                 }
+
+                CompanyBusinessStream::insert($new_record);
             }
 
-            $company->save();
 
-            return response()->json(["status" => "success", "message" => "Данные обновлены"], 200);
+            return response()->json(["status" => "success", "message" => "Компания успешно создана"], 201);
         }
         catch (\Exception $e) {
             return response()->json(["status" => "error", "message" =>  $e->getMessage(). " " . $e->getFile() . " LINE:" . $e->getLine()], 400);
