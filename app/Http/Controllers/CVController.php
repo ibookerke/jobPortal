@@ -52,14 +52,13 @@ class CVController extends Controller
                 return response()->json(["status" => "error", "message" => "JSON validation error"], 400);
             }
 
+            $user_id = $content->user_id;
             $data = array();
-            $user_id = $request['user_id'];
-            $cvs = CVs::where('user_id', '=', $user_id)->get();
 
+            $cvs = CVs::where('user_id', '=', $user_id)->get();
             foreach ($cvs as $cv)
             {
                 $cv_id = $cv['id'];
-
                 $educations = Education::where('cv_id', '=', $cv_id)->get();
                 $experiences = Experience::where('cv_id', '=', $cv_id)->get();
                 $skills = SeekerSkills::where('cv_id', '=', $cv_id)
@@ -67,18 +66,19 @@ class CVController extends Controller
                     ->select('skills.*')
                     ->get();
 
-                array_push($data,
-                    [
+                array_push($data, [
                         'cv' => $cv,
-                        'educations' => $educations,
-                        'experiences' => $experiences,
-                        'skills' => $skills
-                    ]);
+                        'educationArray' => $educations,
+                        'experienceArray' => $experiences,
+                        'skillArray' => $skills
+                    ]
+                );
             }
 
             return $data;
         }
-        catch (\Exception $e) {
+        catch (\Exception $e)
+        {
             return response()->json(["status" => "error", "message" =>  $e->getMessage(). " " . $e->getFile() . " LINE:" . $e->getLine()], 400);
         }
     }
@@ -133,8 +133,6 @@ class CVController extends Controller
             //checking if the request body is filled correctly
             $content = json_decode($request->getContent());
             if(json_last_error() != JSON_ERROR_NONE)
-
-            return response()->json(["message" => $content], 400);
             {
                 return response()->json(["status" => "error", "message" => "JSON validation error"], 400);
             }

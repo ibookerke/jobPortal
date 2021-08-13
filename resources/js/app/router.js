@@ -10,7 +10,7 @@ import LoginComponent from "../components/auth/LoginComponent";
 import Register from "../components/auth/Register";
 import Applications from "../components/seeker/Applications";
 import MyJobPosts from "../components/company/MyJobPosts";
-import SaveCV from "../components/seeker/CVEditor/SaveCV";
+import CVEditor from "../components/seeker/CVEditor/Form";
 import CompanyEditor from "../components/company/CompanyEditor";
 import JobPostEditor from "../components/company/JobPostEditor";
 import Companies from "../components/company/Companies";
@@ -33,7 +33,7 @@ VueRouter.prototype.push = function push(location) {
 var access = {
     application : 2,
     my_job_posts : 1,
-    save_cv: 2,
+    cv_editor: 2,
     edit_company: 1,
     edit_job_post: 1,
     cvs: 1,
@@ -77,8 +77,8 @@ const routes = [
     },
     {
         path: "/cv_editor",
-        name: "save_cv",
-        component: SaveCV
+        name: "cv_editor",
+        component: CVEditor
     },
     {
         path: "/edit_company",

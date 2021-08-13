@@ -79,6 +79,10 @@ export default {
         {
             store.commit('setJPUserID', get.getUserData.id);
             store.commit('setJPCompanyID', get.getCompanyData.id);
+            if (this.editType === true)
+            {
+                store.commit('setJPJobLocationForCreate');
+            }
         }
     },
     methods: {
@@ -110,6 +114,7 @@ export default {
                 {
                     this.update(jobPost, jobLocation, skills, jobTypes);
                 }
+                this.$store.commit('jpClearAll');
 
                 setTimeout(() => {
                     this.submitStatus = 'OK'

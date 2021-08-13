@@ -168,6 +168,9 @@ export default {
         getCVEditType(state) {
             return state.cvEditType;
         },
+        getCVUserID(state) {
+            return state.cvUserID;
+        },
         getCVProfile(state) {
             return state.cvProfile;
         },
