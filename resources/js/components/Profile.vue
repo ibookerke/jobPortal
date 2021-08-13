@@ -5,7 +5,7 @@
 <script>
 
 import CompanyProfile from "./company/CompanyProfile";
-import SeekerProfile from "./seeker/SeekerProfile";
+import SeekerProfile from "./seeker/profile/Profile";
 
 export default {
     name: "Profile",

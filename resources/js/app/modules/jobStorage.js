@@ -144,6 +144,9 @@ export default {
         getJPUserID(state) {
             return state.jpUserID;
         },
+        getJPCompanyID(state) {
+            return state.jpCompanyID;
+        },
         getJPWorkExperience(state) {
             return state.jpWorkExperience;
         },

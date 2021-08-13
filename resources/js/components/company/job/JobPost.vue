@@ -97,7 +97,12 @@ export default {
         this.jobPost = get.getJPJobPost;
         if (!this.editType)
         {
+            // jobPost setter for update is in VacancyCards->editCV
             this.selectedWorkExperience = get.getJPWorkExperience;
+        }
+        else
+        {
+            store.commit('setJPJobPostForCreate');
         }
     },
     methods: {

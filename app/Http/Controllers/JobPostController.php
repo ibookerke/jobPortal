@@ -128,6 +128,7 @@ class JobPostController extends Controller
             if (json_last_error() != JSON_ERROR_NONE) {
                 return response()->json(["status" => "error", "message" => "Ошибка валидации JSON"], 400);
             }
+//            return $content->jobPost;
 
             $user = User::where("id", "=", $content->userID)->first();
             if($user->user_type_id !== 1) {
