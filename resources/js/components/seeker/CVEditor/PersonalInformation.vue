@@ -8,30 +8,30 @@
         <v-row>
             <v-col>
                 <v-text-field
-                    v-model.trim="profile.firstname"
+                    v-model.trim="personalInformation.firstname"
                     :label="labels.firstname"
                     outlined
 
                     :error-messages="firstNameErrors"
                     :counter="255"
                     required
-                    @input="$v.profile.firstname.$touch()"
-                    @blur="$v.profile.firstname.$touch()"
+                    @input="$v.personalInformation.firstname.$touch()"
+                    @blur="$v.personalInformation.firstname.$touch()"
                 />
             </v-col>
         </v-row>
         <v-row>
             <v-col>
                 <v-text-field
-                    v-model.trim="profile.lastname"
+                    v-model.trim="personalInformation.lastname"
                     :label="labels.lastname"
                     outlined
 
                     :error-messages="lastNameErrors"
                     :counter="255"
                     required
-                    @input="$v.profile.lastname.$touch()"
-                    @blur="$v.profile.lastname.$touch()"
+                    @input="$v.personalInformation.lastname.$touch()"
+                    @blur="$v.personalInformation.lastname.$touch()"
                 />
             </v-col>
         </v-row>
@@ -47,7 +47,7 @@
                 >
                     <template v-slot:activator="{ on, attrs }">
                         <v-text-field
-                            v-model="profile.date_of_birth"
+                            v-model="personalInformation.date_of_birth"
                             :label="labels.date_of_birth"
                             prepend-icon="mdi-calendar"
                             readonly
@@ -56,12 +56,12 @@
 
                             :error-messages="dateOfBirthErrors"
                             required
-                            @input="$v.profile.date_of_birth.$touch()"
-                            @blur="$v.profile.date_of_birth.$touch()"
+                            @input="$v.personalInformation.date_of_birth.$touch()"
+                            @blur="$v.personalInformation.date_of_birth.$touch()"
                         ></v-text-field>
                     </template>
                     <v-date-picker
-                        v-model="profile.date_of_birth"
+                        v-model="personalInformation.date_of_birth"
                         @input="dateOfBirthMenu = false"
                         :max="dateOfBirthMax"
                         elevation="15"
@@ -71,12 +71,12 @@
         </v-row>
         <v-row>
             <v-col>
-                <v-radio-group v-model="profile.gender"
+                <v-radio-group v-model="personalInformation.gender"
 
                                :error-messages="genderErrors"
                                required
-                               @input="$v.profile.gender.$touch()"
-                               @blur="$v.profile.gender.$touch()"
+                               @input="$v.personalInformation.gender.$touch()"
+                               @blur="$v.personalInformation.gender.$touch()"
                 >
                     <template>
                         <div>{{ labels.gender }}</div>
@@ -93,36 +93,37 @@
             <v-col>
 <!--                @update="updatePhoneNumber"-->
 <!--                v-model="defaultPhone"-->
-                <VuePhoneNumberInput v-model="profile.phone" default-country-code="KZ"/>
+                <VuePhoneNumberInput v-model="personalInformation.phone" default-country-code="KZ"/>
             </v-col>
         </v-row>
         <v-row>
             <v-col>
                 <v-text-field
-                    v-model.trim="profile.job_title"
+                    v-model.trim="personalInformation.job_title"
                     :label="labels.job_title"
                     outlined
 
                     :error-messages="jobTitleErrors"
                     :counter="255"
                     required
-                    @input="$v.profile.job_title.$touch()"
-                    @blur="$v.profile.job_title.$touch()"
+                    @input="$v.personalInformation.job_title.$touch()"
+                    @blur="$v.personalInformation.job_title.$touch()"
                 />
             </v-col>
         </v-row>
         <v-row>
             <v-col>
                 <v-text-field
-                    v-model.trim="profile.salary"
+                    v-model.trim="personalInformation.salary"
                     :label="labels.salary"
                     type="number"
                     outlined
+                    prefix="KZT"
 
                     :error-messages="salaryErrors"
                     required
-                    @input="$v.profile.salary.$touch()"
-                    @blur="$v.profile.salary.$touch()"
+                    @input="$v.personalInformation.salary.$touch()"
+                    @blur="$v.personalInformation.salary.$touch()"
                 />
             </v-col>
         </v-row>
@@ -141,16 +142,20 @@ import {required, minLength, maxLength, integer, minValue, maxValue} from 'vueli
 export default {
     mixins: [validationMixin],
     name: "personalInformation",
-    components: {
-        VuePhoneNumberInput
-    },
-    props: [
-        'user_id'
-    ],
+    components: {VuePhoneNumberInput},
+    props: ['editorMode', 'currentPersonalInformation'],
     data() {
         return {
-            profile: {},
-
+            personalInformation: {
+                user_id: this.$store.getters.getSeekerUserID,
+                job_title: null,
+                firstname: null,
+                lastname: null,
+                date_of_birth: null,
+                gender: null,
+                phone: null,
+                salary: null
+            },
             labels: {
                 job_title: 'Job Title',
                 firstname: 'First Name',
@@ -161,9 +166,6 @@ export default {
                 salary: 'Salary',
                 currency: 'Currency'
             },
-
-            // // default number, since needs format from updatePhoneNumber()
-            // defaultPhone: null,
 
             // current eligible age for work (14 years +)
             dateOfBirthMax: null,
@@ -176,8 +178,32 @@ export default {
             ]
         }
     },
+    created() {
+        if (this.editorMode === 1) { // update mode
+            this.personalInformation = this.currentPersonalInformation;
+        }
+        this.dateOfBirthMax = this.eligibleAgeForWork();
+    },
+    watch: {
+        personalInformation: {
+            handler: function (val) {
+                this.$emit('setPersonalInformation', val);
+            },
+            deep: true
+        }
+    },
+    methods: {
+        // counts current eligible age for work
+        eligibleAgeForWork() {
+            let current = new Date();
+            let year = current.getFullYear() - 14;
+            let month = current.getMonth();
+            let day = current.getDate();
+            return new Date(year, month, day).toISOString().slice(0,10);
+        }
+    },
     validations: {
-        profile: {
+        personalInformation: {
             firstname: {
                 required,
                 minLength: minLength(2),
@@ -209,73 +235,46 @@ export default {
     computed: {
         jobTitleErrors () {
             const errors = [];
-            if (!this.$v.profile.job_title.$dirty) return errors;
-            !this.$v.profile.job_title.maxLength && errors.push(this.labels.job_title + 'must be at most 255 characters long');
-            !this.$v.profile.job_title.required && errors.push(this.labels.job_title + ' is required.');
+            if (!this.$v.personalInformation.job_title.$dirty) return errors;
+            !this.$v.personalInformation.job_title.maxLength && errors.push(this.labels.job_title + 'must be at most 255 characters long');
+            !this.$v.personalInformation.job_title.required && errors.push(this.labels.job_title + ' is required.');
             return errors;
         },
         firstNameErrors () {
             const errors = [];
-            if (!this.$v.profile.firstname.$dirty) return errors;
-            !this.$v.profile.firstname.maxLength && errors.push(this.labels.firstname + ' must be at most 255 characters long');
-            !this.$v.profile.firstname.required && errors.push(this.labels.firstname + ' is required.');
+            if (!this.$v.personalInformation.firstname.$dirty) return errors;
+            !this.$v.personalInformation.firstname.maxLength && errors.push(this.labels.firstname + ' must be at most 255 characters long');
+            !this.$v.personalInformation.firstname.required && errors.push(this.labels.firstname + ' is required.');
             return errors;
         },
         lastNameErrors () {
             const errors = [];
-            if (!this.$v.profile.lastname.$dirty) return errors;
-            !this.$v.profile.lastname.maxLength && errors.push(this.labels.lastname + ' must be at most 255 characters long');
-            !this.$v.profile.lastname.required && errors.push(this.labels.lastname + ' is required.');
+            if (!this.$v.personalInformation.lastname.$dirty) return errors;
+            !this.$v.personalInformation.lastname.maxLength && errors.push(this.labels.lastname + ' must be at most 255 characters long');
+            !this.$v.personalInformation.lastname.required && errors.push(this.labels.lastname + ' is required.');
             return errors;
         },
         dateOfBirthErrors () {
             const errors = [];
-            if (!this.$v.profile.date_of_birth.$dirty) return errors;
-            !this.$v.profile.date_of_birth.required && errors.push(this.labels.date_of_birth + ' is required.');
+            if (!this.$v.personalInformation.date_of_birth.$dirty) return errors;
+            !this.$v.personalInformation.date_of_birth.required && errors.push(this.labels.date_of_birth + ' is required.');
             return errors;
         },
         genderErrors () {
             const errors = [];
-            if (!this.$v.profile.gender.$dirty) return errors;
-            !this.$v.profile.gender.required && errors.push(this.labels.gender + ' is required.');
+            if (!this.$v.personalInformation.gender.$dirty) return errors;
+            !this.$v.personalInformation.gender.required && errors.push(this.labels.gender + ' is required.');
             return errors;
         },
         salaryErrors () {
             const errors = [];
-            if (!this.$v.profile.salary.$dirty) return errors;
-            !this.$v.profile.salary.minValue && errors.push('Salary must be positive');
-            !this.$v.profile.salary.maxValue && errors.push('Salary must be lower than 2147483647');
-            !this.$v.profile.salary.integer && errors.push('Salary must be an integer');
+            if (!this.$v.personalInformation.salary.$dirty) return errors;
+            !this.$v.personalInformation.salary.minValue && errors.push('Salary must be positive');
+            !this.$v.personalInformation.salary.maxValue && errors.push('Salary must be lower than 2147483647');
+            !this.$v.personalInformation.salary.integer && errors.push('Salary must be an integer');
             return errors;
         },
     },
-    methods: {
-        // // saves needed format of phone number
-        // updatePhoneNumber(val) {
-        //     this.profile.phone = val.formattedNumber;
-        // },
-
-        // counts current eligible age for work
-        eligibleAgeForWork() {
-            let current = new Date();
-            let year = current.getFullYear() - 14;
-            let month = current.getMonth();
-            let day = current.getDate();
-            return new Date(year, month, day).toISOString().slice(0,10);
-        }
-    },
-    created() {
-        this.profile = this.$store.getters.getCVProfile;
-        this.dateOfBirthMax = this.eligibleAgeForWork();
-    },
-    watch: {
-        profile: {
-            handler: function (val) {
-                this.$store.commit('setCVProfile', val);
-            },
-            deep: true
-        }
-    }
 }
 </script>
 

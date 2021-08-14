@@ -1,6 +1,6 @@
 <template>
     <div>
-        <v-row v-for="(item, index) in education" :key="index">
+        <v-row v-for="(item, index) in educationArray" :key="index">
             <v-col>
                 <v-card outlined>
                     <v-card-title>
@@ -32,32 +32,18 @@
 <script>
 export default {
     name: "EducationCards",
+    props: ['currentEducationArray'],
     data() {
         return {
-            education: null
-        }
+            educationArray: [],
+        };
     },
     created() {
-        if (this.$store.getters.getCVEditType) {
-            this.education = this.$store.getters.getCVEducation;
-        }
-        this.unwatch = this.$store.watch(
-            (state, getters) => getters.getCVEducation,
-            (newValue, oldValue) => {
-                this.education = newValue;
-            }
-        )
-    },
-    beforeDestroy() {
-        this.unwatch();
+        this.educationArray = this.currentEducationArray;
     },
     methods: {
         deleteEducation(index) {
-            if (this.$store.getters.getCVEditType && this.education[index].hasOwnProperty('id'))
-            {
-                this.$store.commit('updateRemovedEd', this.education[index].id);
-            }
-            this.$store.commit('cvRemoveEducation', index);
+            this.$emit('deleteItemFromEducationArray', index);
         }
     }
 }

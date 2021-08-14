@@ -9,13 +9,22 @@
                     <h1>Your CV</h1>
                 </v-col>
             </v-row>
-            <personal-information ref="cv_personal_information"/>
-            <experience/>
-            <education/>
-            <skills/>
+            <personal-information :editorMode="editorMode"
+                                  :currentPersonalInformation="cv.personalInformation"
+                                  @setPersonalInformation="setPersonalInformation"
+                                  ref="cv_personal_information"/>
+            <experience :editorMode="editorMode"
+                        :currentExperienceArray="cv.experienceArray"
+                        @setExperience="setExperience"/>
+            <education :editorMode="editorMode"
+                       :currentEducationArray="cv.educationArray"
+                       @setEducation="setEducation"/>
+            <skills :editorMode="editorMode"
+                    :currentSkillArray="cv.skillArray"
+                    @setSkills="setSkills"/>
             <v-row>
                 <v-col>
-                    <v-btn v-if="!cvEditType"
+                    <v-btn v-if="!editorMode"
                            rounded
                            color="primary"
                            dark
@@ -51,41 +60,42 @@
 // validation
 import { validationMixin } from 'vuelidate';
 
-import PersonalInformation from "./Profile";
+import PersonalInformation from "./PersonalInformation";
 import Experience from "./Experience/Experience";
 import Education from "./Education/Education";
 import Skills from "./Skills";
 
-
 export default {
     mixins: [validationMixin],
-    name: "SaveCV",
+    name: "CVEditor",
     components: {Skills, Education, Experience, PersonalInformation},
+    props: ["user_info"],
     data() {
         return {
-            cvEditType: null,
+            editorMode: null,
             cvID: null,
-
-            // information from users table
-            user: {}
+            user_id: null,
+            cv: {
+                personalInformation: {},
+                experienceArray: [],
+                educationArray: [],
+                skillArray: [],
+            }
         }
     },
-    props: ["user_info"],
     created() {
-        if(!this.$store.getters.getUserLoadingStatus)
-        {
-            this.user = this.$store.getters.getUserData;
-        }
-        else
-        {
-            this.$router.push({name: 'login'});
-        }
+        let get = this.$store.getters;
+        this.user_id = get.getSeekerUserID;
+        this.editorMode =  this.$store.getters.getCVEditorMode;
 
-        this.cvEditType =  this.$store.getters.getCVEditType;
-
-        if (this.cvEditType === null)
-        {
-            this.$router.push({name: 'login'});
+        switch (this.editorMode) {
+            case 0:
+                break;
+            case 1:
+                this.cv = get.getSeekerCV;
+                break;
+            default:
+                this.$router.push({name: 'login'});
         }
     },
     watch: {
@@ -94,6 +104,18 @@ export default {
         }
     },
     methods: {
+        setPersonalInformation(value) {
+            this.cv.personalInformation = value;
+        },
+        setExperience(value) {
+            this.cv.experienceArray = value;
+        },
+        setEducation(value) {
+            this.cv.educationArray = value;
+        },
+        setSkills(value) {
+            this.cv.skillArray = value;
+        },
         saveForm() {
             this.$refs.cv_personal_information.$v.$touch();
             if (this.$refs.cv_personal_information.$v.$invalid)
@@ -102,19 +124,12 @@ export default {
             }
             else
             {
-                // do your submit logic here
                 this.submitStatus = 'PENDING';
 
-                let get = this.$store.getters;
-                let exp = get.getCVExperienceRadio ? get.getCVExperience : [];
-                let ed = get.getCVEducationRadio ? get.getCVEducation : [];
                 axios.post(
                     '/api/save_seeker_cv',
                     {
-                        'cv': get.getCVProfile,
-                        'experience': exp,
-                        'education': ed,
-                        'skills': get.getCVSkills
+                        'cv': this.cv,
                     },
                     {
                         headers: {
@@ -125,7 +140,6 @@ export default {
                 then(response => {
                     if (response.status === 201)
                     {
-                        this.$store.commit('cvClearAll');
                         this.$router.push('/profile');
                     }
                 }).
@@ -148,19 +162,10 @@ export default {
                 // do your submit logic here
                 this.submitStatus = 'PENDING';
 
-                let get = this.$store.getters;
-                let exp = get.getCVExperienceRadio ? get.getCVExperience : [];
-                let ed = get.getCVEducationRadio ? get.getCVEducation : [];
-
                 axios.post(
                     '/api/update_seeker_cv',
                     {
-                        'cv': get.getCVProfile,
-                        'experience': exp,
-                        'education': ed,
-                        'skills': get.getCVSkills,
-                        'removedEd': get.getCVRemovedEducationArray,
-                        'removedExp': get.getCVRemovedExperienceArray,
+                        'cv': this.cv
                     },
                     {
                         headers: {
@@ -168,8 +173,8 @@ export default {
                         }
                     }
                 ).then(response => {
+                    console.log(response.data)
                     if (response.status === 201) {
-                        this.$store.commit('cvClearAll');
                         this.$router.push('/profile');
                     }
                 }).catch(error => {

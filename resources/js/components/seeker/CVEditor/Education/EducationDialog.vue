@@ -9,7 +9,6 @@
                    dark
                    v-bind="attrs"
                    v-on="on"
-                   @click="getData"
             >
                 Add education
             </v-btn>
@@ -178,12 +177,18 @@ export default {
     data() {
         return {
             dialog: false,
-
             startingDateMenu: false,
             completingDateMenu: false,
-
-            education: {},
-
+            education: {
+                user_id: this.$store.getters.getSeekerUserID,
+                cv_id: this.$store.getters.getSeekerCVID,
+                certificate_degree_name: null,
+                major: null,
+                starting_date: null,
+                completing_date: null,
+                percentage: null,
+                cgpa: null,
+            },
             labels: {
                 certificate_degree_name: 'Certificate degree name',
                 major: 'Major',
@@ -191,6 +196,39 @@ export default {
                 completing_date: 'Completing date',
                 percentage: 'Percentage',
                 cgpa: 'CGPA'
+            }
+        }
+    },
+    methods: {
+        closeDialog() {
+            this.dialog = false;
+            this.education = {
+                user_id: this.$store.getters.getSeekerUserID,
+                cv_id: this.$store.getters.getSeekerCVID,
+                certificate_degree_name: null,
+                major: null,
+                starting_date: null,
+                completing_date: null,
+                percentage: null,
+                cgpa: null,
+            };
+        },
+        saveEducation() {
+            this.$v.$touch();
+            if (this.$v.$invalid) {
+                this.submitStatus = 'ERROR';
+            } else {
+                // do your submit logic here
+                this.submitStatus = 'PENDING';
+                this.$v.$reset();
+
+                this.$emit('addNewEducation', this.education);
+
+                setTimeout(() => {
+                    this.submitStatus = 'OK'
+                }, 500);
+
+                this.closeDialog();
             }
         }
     },
@@ -256,36 +294,6 @@ export default {
             return errors;
         }
     },
-    methods: {
-        getData() {
-            this.education = this.$store.getters.getCVEd;
-        },
-
-        closeDialog() {
-            this.dialog = false;
-            this.education = {};
-        },
-
-        saveEducation() {
-            this.$v.$touch();
-            if (this.$v.$invalid) {
-                this.submitStatus = 'ERROR';
-            } else {
-                // do your submit logic here
-                this.submitStatus = 'PENDING';
-                this.$v.$reset();
-
-                this.$store.commit('cvAppendEducation', this.education);
-                this.$store.commit('clearCVEd');
-
-
-                setTimeout(() => {
-                    this.submitStatus = 'OK'
-                }, 500);
-                this.closeDialog();
-            }
-        }
-    }
 }
 </script>
 

@@ -26,52 +26,61 @@
                     <v-label>Places of work</v-label>
                 </v-col>
                 <v-col>
-                    <education-dialog/>
+                    <education-dialog @addNewEducation="addNewEducation"/>
                 </v-col>
             </v-row>
-            <education-cards/>
+            <education-cards :currentEducationArray="educationArray" @deleteItemFromEducationArray="deleteItemFromEducationArray"/>
         </div>
     </div>
 </template>
 
 <script>
-import RadioButton from "../../../Inputs/RadioButton";
 import EducationDialog from "./EducationDialog";
 import EducationCards from "./EducationCards";
 
 export default {
     name: "Education",
-    components: {
-        EducationCards,
-        EducationDialog,
-        RadioButton
-    },
+    components: {EducationCards, EducationDialog},
+    props: ['editorMode', 'currentEducationArray'],
     data() {
         return {
+            educationArray: [],
             educationRadio: {
                 label: 'Education',
                 radios: [
                     'No education',
                     'Has education'
                 ],
-                value: null
+                value: 0
             },
-
             labels: {
-                educationRadio: 'Work education',
+                educationRadio: 'Education',
             },
         }
     },
     created() {
-        let get = this.$store.getters;
-        if (get.getCVEditType)
+        if (this.editorMode === 1)
         {
-            this.educationRadio.value = get.getCVEducation.length ? 1 : 0;
+            this.educationArray = this.currentEducationArray;
+            this.educationRadio.value = this.educationArray.length ? 1 : 0;
         }
     },
     watch: {
         'educationRadio.value': function (val) {
-            this.$store.commit('setCVEducationRadio', val);
+            let emit = val ? this.educationArray : [];
+            this.$emit('setEducation', emit);
+        },
+        educationArray: function (val) {
+            let emit = this.educationRadio.value ? val : [];
+            this.$emit('setEducation', emit);
+        },
+    },
+    methods: {
+        addNewEducation(val) {
+            this.educationArray.push(val);
+        },
+        deleteItemFromEducationArray(val) {
+            this.educationArray.splice(val, 1);
         }
     }
 }

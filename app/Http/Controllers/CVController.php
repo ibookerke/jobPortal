@@ -67,7 +67,7 @@ class CVController extends Controller
                     ->get();
 
                 array_push($data, [
-                        'cv' => $cv,
+                        'personalInformation' => $cv,
                         'educationArray' => $educations,
                         'experienceArray' => $experiences,
                         'skillArray' => $skills
@@ -127,9 +127,7 @@ class CVController extends Controller
 
     public function createCV(Request $request)
     {
-        try
-        {
-
+        try {
             //checking if the request body is filled correctly
             $content = json_decode($request->getContent());
             if(json_last_error() != JSON_ERROR_NONE)
@@ -137,18 +135,19 @@ class CVController extends Controller
                 return response()->json(["status" => "error", "message" => "JSON validation error"], 400);
             }
 
-            $cv = $request['cv'];
-            $experiences = $request['experience'];
-            $educations = $request['education'];
-            $skills = $request['skills'];
+            $cv = $content->cv;
+            $personal_information = $cv->personalInformation;
+            $experience_array = $cv->experienceArray;
+            $education_array = $cv->educationArray;
+            $skill_array = $cv->skillArray;
 
             //checking if the data passed satisfies the validation requirements
-            if (trim($cv['date_of_birth']) == null)
+            if (trim($personal_information->date_of_birth) == null)
             {
-                $cv['date_of_birth'] = null;
+                $personal_information->date_of_birth = null;
             }
             $eligible_for_work_age = date('Y-m-d', mktime(0, 0, 0, date("m"), date("d"), date("Y") - 14));
-            $validator = Validator::make($cv, [
+            $validator = Validator::make((array)$personal_information, [
                 'user_id' => "required|numeric|min:1",
                 'job_title' => "required|min:2|max:255",
                 'firstname' => "required|min:2|max:255",
@@ -156,54 +155,52 @@ class CVController extends Controller
                 'date_of_birth' => "nullable|date_format:Y-m-d|before:" . $eligible_for_work_age,
                 'gender' => "nullable|numeric|min:0",
                 'phone' => "nullable|min:2|max:20",
-                'salary' => "nullable|min:2|max:255",
-                'currency' => "nullable|min:2|max:50"
+                'salary' => "nullable|min:2|max:255"
             ]);
             if ($validator->fails())
             {
                 return response()->json(["status" => "error", "errors" => $validator->errors()], 400);
             }
-            $cv_id = CVs::insertGetId($cv);
+            $cv_id = CVs::insertGetId((array)$personal_information);
 
-
-            foreach ($experiences as $experience)
+            foreach ($experience_array as $experience)
             {
-                $experience['cv_id'] = $cv_id;
-                $validator = Validator::make($experience, $this->create_rules['experience']);
+                $experience->cv_id = $cv_id;
+                $validator = Validator::make((array)$experience, $this->create_rules['experience']);
                 if ($validator->fails())
                 {
                     return response()->json(["status" => "error", "errors" => $validator->errors()], 400);
                 }
 
-                Experience::insert($experience);
+                Experience::insert((array)$experience);
             }
 
 
-            foreach ($educations as $education)
+            foreach ($education_array as $education)
             {
-                $education['cv_id'] = $cv_id;
-                $validator = Validator::make($education, $this->create_rules['education']);
+                $education->cv_id = $cv_id;
+                $validator = Validator::make((array)$education, $this->create_rules['education']);
                 if ($validator->fails())
                 {
                     return response()->json(["status" => "error", "errors" => $validator->errors()], 400);
                 }
 
-                Education::insert($education);
+                Education::insert((array)$education);
             }
 
 
             $new_skills = array();
-            $seeker_skills= array();
-            foreach ($skills as $skillKey => $skillVal)
+            $seeker_skills = array();
+            foreach ($skill_array as $skillKey => $skillVal)
             {
                 if (gettype($skillVal) == 'string')
                 {
-                    array_push($new_skills, ['name' => $skillVal]);
-                    unset($skills[$skillKey]);
+                    array_push($new_skills, ['name' => (array)$skillVal]);
+                    unset($skill_array[$skillKey]);
                 }
                 else
                 {
-                    array_push($seeker_skills, ['skill_id' => $skillVal['id'], 'cv_id' => $cv_id]);
+                    array_push($seeker_skills, ['skill_id' => $skillVal->id, 'cv_id' => $cv_id]);
                 }
             }
 
@@ -244,101 +241,75 @@ class CVController extends Controller
                 return response()->json(["status" => "error", "message" => "JSON validation error"], 400);
             }
 
-
-            $cv = $request['cv'];
-            $cv_id = $cv['id'];
-            $user_id = $cv['user_id'];
+            $cv = $content->cv;
+            $personal_information = $cv->personalInformation;
+            $cv_id = $personal_information->id;
+            $experience_array = $cv->experienceArray;
+            $education_array = $cv->educationArray;
+            $skill_array = $cv->skillArray;
 
             //checking if the data passed satisfies the validation requirements
-            if (trim($cv['date_of_birth']) == null)
+            if (trim($personal_information->date_of_birth) == null)
             {
-                $cv['date_of_birth'] = null;
+                $personal_information->date_of_birth = null;
             }
             $eligible_for_work_age = date('Y-m-d', mktime(0, 0, 0, date("m"), date("d"), date("Y") - 14));
-            $validator = Validator::make($cv, [
-                'user_id' => "required|numeric|min:1",
+            $validator = Validator::make((array)$personal_information, [
                 'id' => "required|numeric|min:1",
+                'user_id' => "required|numeric|min:1",
                 'job_title' => "required|min:2|max:255",
                 'firstname' => "required|min:2|max:255",
                 'lastname' => "required|min:2|max:255",
                 'date_of_birth' => "nullable|date_format:Y-m-d|before:" . $eligible_for_work_age,
                 'gender' => "nullable|numeric|min:0",
                 'phone' => "nullable|min:2|max:20",
-                'salary' => 'nullable|numeric',
-                'currency' => "nullable|min:2|max:50"
+                'salary' => "nullable|min:2|max:255"
             ]);
             if ($validator->fails())
             {
                 return response()->json(["status" => "error", "errors" => $validator->errors()], 400);
             }
-            CVs::where('id', '=', $cv_id)->update($cv);
+            CVs::where('id', '=', $cv_id)->update((array)$personal_information);
 
-
-            $removedEducation = $request['removedEd'];
-            if (count($removedEducation) > 0)
+            Education::where('cv_id', '=', $cv_id)->delete();
+            foreach ($education_array as $education)
             {
-                foreach ($removedEducation as $remEd)
+                $education->cv_id = $cv_id;
+                $validator = Validator::make((array)$education, $this->create_rules['education']);
+                if ($validator->fails())
                 {
-                    Education::where('id', '=', $remEd)->delete();
+                    return response()->json(["status" => "error", "errors" => $validator->errors()], 400);
                 }
+
+                Education::insert((array)$education);
             }
 
-            $educationArray = $request['education'];
-            foreach ($educationArray as $education)
+            Experience::where('cv_id', '=', $cv_id)->delete();
+            foreach ($experience_array as $experience)
             {
-                if (!array_key_exists('id', $education))
+                $experience->cv_id = $cv_id;
+                $validator = Validator::make((array)$experience, $this->create_rules['experience']);
+                if ($validator->fails())
                 {
-                    $education['cv_id'] = $cv_id;
-                    $validator = Validator::make($education, $this->create_rules['education']);
-                    if ($validator->fails())
-                    {
-                        return response()->json(["status" => "error", "errors" => $validator->errors()], 400);
-                    }
-                    Education::insert($education);
+                    return response()->json(["status" => "error", "errors" => $validator->errors()], 400);
                 }
+
+                Experience::insert((array)$experience);
             }
-
-
-            $removedExperience = $request['removedExp'];
-            if (count($removedExperience) > 0)
-            {
-                foreach ($removedExperience as $remExp)
-                {
-                    Experience::where('id', '=', $remExp)->delete();
-                }
-            }
-
-            $experienceArray = $request['experience'];
-            foreach ($experienceArray as $experience)
-            {
-                if (!array_key_exists('id', $experience))
-                {
-                    $experience['cv_id'] = $cv_id;
-                    $validator = Validator::make($experience, $this->create_rules['experience']);
-                    if ($validator->fails())
-                    {
-                        return response()->json(["status" => "error", "errors" => $validator->errors()], 400);
-                    }
-
-                    Experience::insert($experience);
-                }
-            }
-
 
             SeekerSkills::where('cv_id', '=', $cv_id)->delete();
-            $skills = $request['skills'];
             $new_skills = array();
-            $seeker_skills= array();
-            foreach ($skills as $skillKey => $skillVal)
+            $seeker_skills = array();
+            foreach ($skill_array as $skillKey => $skillVal)
             {
                 if (gettype($skillVal) == 'string')
                 {
-                    array_push($new_skills, ['name' => $skillVal]);
-                    unset($skills[$skillKey]);
+                    array_push($new_skills, ['name' => (array)$skillVal]);
+                    unset($skill_array[$skillKey]);
                 }
                 else
                 {
-                    array_push($seeker_skills, ['skill_id' => $skillVal['id'], 'cv_id' => $cv_id]);
+                    array_push($seeker_skills, ['skill_id' => $skillVal->id, 'cv_id' => $cv_id]);
                 }
             }
 
@@ -357,7 +328,6 @@ class CVController extends Controller
                     array_push($seeker_skills, ['skill_id' => $val, 'cv_id' => $cv_id]);
                 }
             }
-
             SeekerSkills::insert($seeker_skills);
 
             return response()->json(["status" => "success", "message" => "CV successfully updated"], 201);
@@ -378,8 +348,7 @@ class CVController extends Controller
                 return response()->json(["status" => "error", "message" => "JSON validation error"], 400);
             }
 
-            $cv_id = $request['cv_id'];
-            CVs::find($cv_id)->delete();
+            CVs::find($content->cv_id)->delete();
 
             return response()->json(["status" => "success", "message" => "CV successfully deleted"], 200);
         }

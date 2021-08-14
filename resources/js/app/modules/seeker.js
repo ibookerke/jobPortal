@@ -1,35 +1,41 @@
 export default{
     state: {
-        user_id: null,
-        cv_id: null,
-        editor_mode: null, // create -> 0, update -> 1, show -> 3
+        seeker_user_id: null,
+        seeker_cv_id: null,
+        seeker_editor_mode: null, // create -> 0, update -> 1, show -> 3
+        seeker_cv: null,
     },
     mutations: {
         setSeekerUserID(state, user_id) {
-            state.user_id = user_id;
+            state.seeker_user_id = user_id;
         },
         setSeekerCVID(state, cv_id) {
-            state.cv_id = cv_id;
+            state.seeker_cv_id = cv_id;
         },
 
         setCVEditorModeCreate(state) {
-            state.editor_mode = 0;
+            state.seeker_editor_mode = 0;
         },
         setCVEditorModeUpdate(state) {
-            state.editor_mode = 1;
+            state.seeker_editor_mode = 1;
         },
 
+        setSeekerCV(state, cv) {
+            state.seeker_cv = cv;
+        }
     },
     getters: {
         getSeekerUserID(state) {
-            return state.user_id;
+            return state.seeker_user_id;
         },
         getSeekerCVID(state) {
-            return state.cv_id;
+            return state.seeker_cv_id;
         },
         getCVEditorMode(state) {
-            return state.editor_mode;
+            return state.seeker_editor_mode;
         },
-
+        getSeekerCV(state) {
+            return state.seeker_cv;
+        }
     },
 }
