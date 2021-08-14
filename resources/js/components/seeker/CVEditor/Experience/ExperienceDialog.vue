@@ -9,7 +9,6 @@
                    dark
                    v-bind="attrs"
                    v-on="on"
-                   @click="getData"
             >
                 Add work
             </v-btn>
@@ -168,15 +167,19 @@ export default {
     data() {
         return {
             dialog: false,
-
             startDateMenu: false,
             endDateMenu: false,
-
-            // data for date pickers
-            currentDate: new Date().toISOString().slice(0,10),
-
-            experience: {},
-
+            currentDate: new Date().toISOString().slice(0,10), // data for date pickers
+            experience: {
+                user_id: this.$store.getters.getSeekerUserID,
+                cv_id: this.$store.getters.getSeekerCVID,
+                is_current_job: true,
+                start_date: null,
+                end_date: null,
+                job_title: null,
+                company_name: null,
+                job_description: null,
+            },
             labels: {
                 start_date: 'Start of work',
                 is_current_job: 'To present',
@@ -184,6 +187,43 @@ export default {
                 company_name: 'Company name',
                 job_title: 'Job title',
                 job_description: 'Job description'
+            }
+        }
+    },
+    methods: {
+        closeDialog() {
+            this.dialog = false;
+            this.experience = {
+                user_id: this.$store.getters.getSeekerUserID,
+                cv_id: this.$store.getters.getSeekerCVID,
+                is_current_job: true,
+                start_date: null,
+                end_date: null,
+                job_title: null,
+                company_name: null,
+                job_description: null,
+            };
+        },
+        saveExperience() {
+            this.$v.$touch();
+            if (this.$v.$invalid) {
+                this.submitStatus = 'ERROR';
+            } else {
+                // do your submit logic here
+                this.submitStatus = 'PENDING';
+                this.$v.$reset();
+
+                if (this.experience.is_current_job) {
+                    this.experience.end_date = null;
+                }
+                this.experience.is_current_job = this.experience.is_current_job ? 1 : 0;
+                this.$emit('addNewExperience', this.experience);
+
+                setTimeout(() => {
+                    this.submitStatus = 'OK'
+                }, 500);
+
+                this.closeDialog();
             }
         }
     },
@@ -238,40 +278,6 @@ export default {
             return errors;
         }
     },
-    methods: {
-        getData() {
-            this.experience = this.$store.getters.getCVExp;
-        },
-
-        closeDialog() {
-            this.dialog = false;
-            this.experience = {};
-        },
-
-        saveExperience() {
-            this.$v.$touch();
-            if (this.$v.$invalid) {
-                this.submitStatus = 'ERROR';
-            } else {
-                // do your submit logic here
-                this.submitStatus = 'PENDING';
-                this.$v.$reset();
-
-                if (this.experience.is_current_job) {
-                    this.experience.end_date = null;
-                }
-                this.experience.is_current_job = this.experience.is_current_job ? 1 : 0;
-
-                this.$store.commit('cvAppendExperience', this.experience);
-                this.$store.commit('clearCVExp');
-
-                setTimeout(() => {
-                    this.submitStatus = 'OK'
-                }, 500);
-                this.closeDialog();
-            }
-        }
-    }
 }
 </script>
 

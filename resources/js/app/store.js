@@ -3,7 +3,6 @@ import Vuex from "vuex";
 
 import user_info from "./modules/user_info";
 import schema from "./modules/schema";
-import cvstorage from "./modules/cvstorage";
 import seeker from "./modules/seeker";
 import jobStorage from "./modules/jobStorage";
 import company from "./modules/company";
@@ -30,7 +29,6 @@ const store = new Vuex.Store({
     modules: {
         user_info,
         schema,
-        cvstorage,
         seeker,
         company,
         jobStorage,

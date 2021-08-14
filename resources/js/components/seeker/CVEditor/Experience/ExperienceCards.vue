@@ -1,6 +1,6 @@
 <template>
     <div>
-        <v-row v-for="(item, index) in experience" :key="index">
+        <v-row v-for="(item, index) in experienceArray" :key="index">
             <v-col>
                 <v-card outlined>
                     <v-card-title>
@@ -32,34 +32,19 @@
 <script>
 export default {
     name: "ExperienceCards",
+    props: ['currentExperienceArray'],
     data() {
         return {
-            experience: null
-        }
+            experienceArray: [],
+        };
     },
     created() {
-        if (this.$store.getters.getCVEditType) {
-            this.experience = this.$store.getters.getCVExperience;
-        }
-        this.unwatch = this.$store.watch(
-            (state, getters) => getters.getCVExperience,
-            (newValue, oldValue) => {
-                this.experience = newValue;
-            }
-        )
-    },
-    beforeDestroy() {
-        this.unwatch();
+        this.experienceArray = this.currentExperienceArray;
     },
     methods: {
         deleteExperience(index) {
-            if (this.$store.getters.getCVEditType && this.experience[index].hasOwnProperty('id'))
-            {
-                this.$store.commit('updateRemovedExp', this.experience[index].id);
-            }
-            this.$store.commit('cvRemoveExperience', index);
+            this.$emit('deleteItemFromExperienceArray', index);
         },
-
         endDate(date) {
             return (!date) ? 'current day' : date;
         }

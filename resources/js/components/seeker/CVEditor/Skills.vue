@@ -34,12 +34,54 @@
 <script>
 export default {
     name: "Skills",
-    data: () => ({
-        items: [],
-        model: [],
-        search: null,
-        stopSearch: false
-    }),
+    props: ['editorMode', 'currentSkillArray'],
+    data() {
+        return {
+            items: [],
+            model: [],
+            search: null,
+            stopSearch: false,
+        };
+    },
+    created() {
+        this.getSkills();
+        if (this.editorMode === 1) {this.model = this.currentSkillArray;}
+    },
+    watch: {
+        model (val) {
+            if (val.length > 30) {
+                this.$nextTick(() => this.model.pop());
+            }
+            this.$emit('setSkills', val)
+        },
+        search (val, old) {
+            if (val !== null && val !== '')
+            {
+                if (val.length > 1)
+                {
+                    if (!this.stopSearch)
+                    {
+                        this.searchSkills(val);
+                        if (!this.items.length)
+                        {
+                            this.stopSearch = true;
+                        }
+                    }
+                    else
+                    {
+                        if (!(old.length < val.length) && !val.substring(0, old.val) === old)
+                        {
+                            this.stopSearch = false;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                this.getSkills();
+            }
+        }
+    },
     methods: {
         getSkills() {
             axios.post(
@@ -72,48 +114,6 @@ export default {
             }).catch(error => {
                 console.log(error.response.data);
             });
-        }
-    },
-    created() {
-        this.getSkills();
-        if (this.$store.getters.getCVEditType)
-        {
-            this.model = this.$store.getters.getCVSkills;
-        }
-    },
-    watch: {
-        model (val, old) {
-            if (val.length > 30) {
-                this.$nextTick(() => this.model.pop());
-            }
-            this.$store.commit('setCVSkills', val);
-        },
-        search (val, old) {
-            if (val !== null && val !== '')
-            {
-                if (val.length > 1)
-                {
-                    if (!this.stopSearch)
-                    {
-                        this.searchSkills(val);
-                        if (!this.items.length)
-                        {
-                            this.stopSearch = true;
-                        }
-                    }
-                    else
-                    {
-                        if (!(old.length < val.length) && !val.substring(0, old.val) === old)
-                        {
-                            this.stopSearch = false;
-                        }
-                    }
-                }
-            }
-            else
-            {
-                this.getSkills();
-            }
         }
     },
 }

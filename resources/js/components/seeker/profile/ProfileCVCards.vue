@@ -1,16 +1,16 @@
 <template>
     <div>
-        <v-row v-if="cvs.length" v-for="(item, key) in cvs" :key="key">
+        <v-row v-for="(item, key) in cvs" :key="key">
             <v-col>
                 <v-card class="mx-auto" elevation="10" outlined shaped>
                     <v-card-title>
                         <h2>
-                            {{ item.cv.job_title }}
+                            {{ item.personalInformation.job_title }}
                         </h2>
                     </v-card-title>
-                    <v-card-text v-if="item.cv.salary">
+                    <v-card-text v-if="item.personalInformation.salary">
                         <div class="text-subtitle-1">
-                            $ • {{ item.cv.salary }}
+                            $ • {{ item.personalInformation.salary }}
                         </div>
                     </v-card-text>
 
@@ -71,7 +71,7 @@
                         <v-btn color="primary" @click="updateCV(key)">
                             EDIT
                         </v-btn>
-                        <v-btn color="error" @click="deleteCV(item.cv.id)">
+                        <v-btn color="error" @click="deleteCV(item.personalInformation.id)">
                             DELETE
                         </v-btn>
                     </v-card-actions>
@@ -84,6 +84,7 @@
 <script>
 export default {
     name: "ProfileCVCards",
+    props: ['user_id'],
     data() {
         return {
             cvs: [],
@@ -103,7 +104,7 @@ export default {
             axios.post(
                 '/api/get_seeker_cvs',
                 {
-                    'user_id': this.$store.getters.getCVUserID,
+                    'user_id': this.user_id,
                 },
                 {
                     headers: {

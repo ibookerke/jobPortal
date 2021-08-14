@@ -26,10 +26,10 @@
                     <v-label>Places of work</v-label>
                 </v-col>
                 <v-col>
-                    <experience-dialog/>
+                    <experience-dialog @addNewExperience="addNewExperience"/>
                 </v-col>
             </v-row>
-            <experience-cards/>
+            <experience-cards :currentExperienceArray="experienceArray" @deleteItemFromExperienceArray="deleteItemFromExperienceArray"/>
         </div>
     </div>
 </template>
@@ -40,36 +40,47 @@ import ExperienceCards from "./ExperienceCards";
 
 export default {
     name: "Profession",
-    components: {
-        ExperienceCards,
-        ExperienceDialog
-    },
+    components: {ExperienceCards, ExperienceDialog},
+    props: ['editorMode', 'currentExperienceArray'],
     data() {
         return {
+            experienceArray: [],
             workExperienceRadio: {
                 label: 'Work experience',
                 radios: [
                     'No work experience',
                     'Has experience'
                 ],
-                value: null
+                value: 0
             },
-
             labels: {
                 workExperienceRadio: 'Work experience',
             },
         }
     },
     created() {
-        let get = this.$store.getters;
-        if (get.getCVEditType)
+        if (this.editorMode === 1)
         {
-            this.workExperienceRadio.value = get.getCVExperience.length ? 1 : 0;
+            this.experienceArray = this.currentExperienceArray;
+            this.workExperienceRadio.value = this.experienceArray.length ? 1 : 0;
         }
     },
     watch: {
         'workExperienceRadio.value': function (val) {
-            this.$store.commit('setCVExperienceRadio', val);
+            let emit = val ? this.experienceArray : [];
+            this.$emit('setExperience', emit);
+        },
+        educationArray: function (val) {
+            let emit = this.workExperienceRadio.value ? val : [];
+            this.$emit('setExperience', emit);
+        },
+    },
+    methods: {
+        addNewExperience(val) {
+            this.experienceArray.push(val);
+        },
+        deleteItemFromExperienceArray(val) {
+            this.experienceArray.splice(val, 1);
         }
     }
 }

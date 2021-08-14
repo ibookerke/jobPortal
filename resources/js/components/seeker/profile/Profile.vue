@@ -12,7 +12,7 @@
                 </v-btn>
             </v-col>
         </v-row>
-        <profile-c-v-cards :key="forceReRenderCVCards" @updateCV="updateCV" @deleteCV="deleteCV"/>
+        <profile-c-v-cards :key="forceReRenderCVCards" :user_id="user.id" @updateCV="updateCV" @deleteCV="deleteCV"/>
     </v-container>
 </template>
 
@@ -21,15 +21,13 @@ import ProfileCVCards from "./ProfileCVCards";
 export default {
     name: "SeekerProfile",
     components: {ProfileCVCards},
+    props: ["user_info"],
     data() {
         return {
             user: {},
             forceReRenderCVCards: 0,
         }
     },
-    props: [
-        "user_info"
-    ],
     created() {
         this.user = this.user_info;
         this.$store.commit('setSeekerUserID', this.user.id);
@@ -47,11 +45,7 @@ export default {
         },
         updateCV(cv) { // pushes all data to storage, which will be fetched there
             this.$store.commit('setCVEditorModeUpdate');
-            this.$store.commit('setCVID', cv.cv['id']);
-            this.$store.commit('setCVProfile', cv.cv);
-            this.$store.commit('setCVEducation', cv.educationArray);
-            this.$store.commit('setCVExperience', cv.experienceArray);
-            this.$store.commit('setCVSkills', cv.skillArray);
+            this.$store.commit('setSeekerCV', cv);
             this.$router.push({name: 'cv_editor'});
         },
         deleteCV(cv_id) {
