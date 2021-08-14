@@ -9,12 +9,12 @@ import Profile from "../components/Profile";
 import LoginComponent from "../components/auth/LoginComponent";
 import Register from "../components/auth/Register";
 import Applications from "../components/seeker/Applications";
-import MyJobPosts from "../components/company/MyJobPosts";
+import CompanyJobPosts from "../components/company/JobPosts/CompanyJobPosts";
 import CVEditor from "../components/seeker/CVEditor/Form";
 import CompanyEditor from "../components/company/CompanyEditor";
-import JobPostEditor from "../components/company/JobPostEditor";
+import JobPostEditor from "../components/company/JobPosts/JobPostEditor/JobPostEditor";
 import Companies from "../components/company/Companies";
-import JobPosts from "../components/company/JobPosts";
+import JobPosts from "../components/company/JobPosts/JobPosts";
 import CVs from "../components/seeker/CVs";
 import CV from "../components/seeker/CV";
 
@@ -73,7 +73,7 @@ const routes = [
     {
         path: "/my_job_posts",
         name: "my_job_posts",
-        component: MyJobPosts
+        component: CompanyJobPosts
     },
     {
         path: "/cv_editor",

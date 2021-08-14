@@ -73,7 +73,6 @@ export default {
     data() {
         return {
             editorMode: null,
-            cvID: null,
             user_id: null,
             cv: {
                 personalInformation: {},

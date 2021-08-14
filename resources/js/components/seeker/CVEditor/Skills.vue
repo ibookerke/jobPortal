@@ -1,5 +1,5 @@
 <template>
-    <v-container>
+    <div>
         <v-row>
             <v-col>
                 <h2>Skills</h2>
@@ -13,7 +13,7 @@
             :search-input.sync="search"
             hide-selected
             hint="Maximum of 30 tags"
-            label="Add some tags"
+            label="Add some skills"
             multiple
             persistent-hint
             small-chips
@@ -28,7 +28,7 @@
                 </v-list-item>
             </template>
         </v-combobox>
-    </v-container>
+    </div>
 </template>
 
 <script>
@@ -52,7 +52,7 @@ export default {
             if (val.length > 30) {
                 this.$nextTick(() => this.model.pop());
             }
-            this.$emit('setSkills', val)
+            this.$emit('setSkills', val);
         },
         search (val, old) {
             if (val !== null && val !== '')

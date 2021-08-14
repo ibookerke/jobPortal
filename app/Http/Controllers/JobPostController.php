@@ -36,7 +36,7 @@ class JobPostController extends Controller
             'country_id' => "required|numeric|min:1"
         ],
         'skills' => [
-            'name' => "required|min:2|max:255"
+            'name' => "required|max:255"
         ],
         'job_type' => [
             'id' => "required|numeric|min:1|max:5",
@@ -55,10 +55,9 @@ class JobPostController extends Controller
 
             // checking for correct access role
             $user = User::where("id", "=", $content->user_id)->first();
-            if($user->user_type_id !== 1) {
+            if($user['user_type_id'] !== 1) {
                 return response()->json(["statue" => "error", "message" => "Only employer can create vacancies."], 400);
             }
-
 
             // fetching data
             $data = array();
@@ -80,7 +79,6 @@ class JobPostController extends Controller
                     ->select('skills.*')
                     ->get();
                 $location = JobLocation::where('job_location.id', '=', $location_id)->first();
-//                return $location;
                 $country = Countries::where('id', '=', $location['country_id'])->select('id', 'name')->first();
                 $state = States::where('id', '=', $location['state_id'])->select('id', 'name')->first();
                 $city = Cities::where('id', '=', $location['city_id'])->select('id', 'name')->first();
@@ -88,17 +86,17 @@ class JobPostController extends Controller
 
                 array_push($data,
                     [
-                        'jobPost' => $job_post,
-                        'jobTypes' => $job_types,
-                        'jobLocationDetails' => (object) [
+                        'job_post' => $job_post,
+                        'job_type_array' => $job_types,
+                        'job_location_details' => (object) [
                             'country' => $country,
                             'state' => $state,
                             'city' => $city,
                             'address' => $location['address']
                         ],
-                        'jobLocation' => $location,
-                        'skills' => $skills,
-                        'workExperienceType' => $work_experience
+                        'job_location' => $location,
+                        'skill_array' => $skills,
+                        'work_experience_type' => $work_experience
                     ]
                 );
             }
@@ -128,53 +126,57 @@ class JobPostController extends Controller
             if (json_last_error() != JSON_ERROR_NONE) {
                 return response()->json(["status" => "error", "message" => "Ошибка валидации JSON"], 400);
             }
-//            return $content->jobPost;
 
-            $user = User::where("id", "=", $content->userID)->first();
-            if($user->user_type_id !== 1) {
+            $job_post = $content->job_post;
+            $job_post_main = $job_post->job_post;
+            $job_type_array = $job_post->job_type_array;
+            $job_location = $job_post->job_location;
+            $skill_array = $job_post->skill_array;
+            $user_id = $content->user_id;
+
+            $user = User::where("id", "=", $user_id)->first();
+            if($user['user_type_id'] !== 1) {
                 return response()->json(["statue" => "error", "message" => "Only employer can create vacancies."], 400);
             }
 
             //checking if the data passed satisfies the validation requirements
-            $validator = Validator::make($request['jobLocation'], $this->rules['job_location']);
+            $validator = Validator::make((array)$job_location, $this->rules['job_location']);
             if($validator->fails()){
                 return response()->json(["status" => "error", "message" => "Ошибки валидации", "errors" => $validator->errors()], 400);
             }
+            $location_id = JobLocation::insertGetId((array)$job_location);
 
-            $location_id = JobLocation::insertGetId($request['jobLocation']);
 
-            $job_post = $request['jobPost'];
-            $job_post['location_id'] = $location_id;
-            $validator = Validator::make($job_post, $this->rules['job_post']);
+            $job_post_main->location_id = $location_id;
+            $validator = Validator::make((array)$job_post_main, $this->rules['job_post']);
             if($validator->fails()){
                 return response()->json(["status" => "error", "message" => "Ошибки валидации", "errors" => $validator->errors()], 400);
             }
+            $job_post_id = JobPost::insertGetId((array)$job_post_main);
 
-            $job_post_id = JobPost::insertGetId($job_post);
 
-            $jobTypes = $request['jobTypes'];
-            foreach ($jobTypes as $job_type)
+            foreach ($job_type_array as $job_type)
             {
-                $validator = Validator::make($job_type, $this->rules['job_type']);
+                $validator = Validator::make((array)$job_type, $this->rules['job_type']);
                 if($validator->fails()){
                     return response()->json(["status" => "error", "message" => "Ошибки валидации", "errors" => $validator->errors()], 400);
                 }
-                JobPostJobType::insert(['job_post_id' => $job_post_id, 'job_type_id' => $job_type['id']]);
+                JobPostJobType::insert(['job_post_id' => $job_post_id, 'job_type_id' => $job_type->id]);
             }
 
-            $skills = $request['skills'];
+
             $new_skills = array();
             $job_post_skills= array();
-            foreach ($skills as $skillKey => $skillVal)
+            foreach ($skill_array as $skillKey => $skillVal)
             {
                 if (gettype($skillVal) == 'string')
                 {
                     array_push($new_skills, ['name' => $skillVal]);
-                    unset($skills[$skillKey]);
+                    unset($skill_array[$skillKey]);
                 }
                 else
                 {
-                    array_push($job_post_skills, ['skill_id' => $skillVal['id'], 'job_post_id' => $job_post_id]);
+                    array_push($job_post_skills, ['skill_id' => $skillVal->id, 'job_post_id' => $job_post_id]);
                 }
             }
             if (count($new_skills) > 0)
@@ -193,7 +195,6 @@ class JobPostController extends Controller
                     array_push($job_post_skills, ['skill_id' => $val, 'job_post_id' => $job_post_id]);
                 }
             }
-
             JobPostSkills::insert($job_post_skills);
 
             return response()->json(["status" => "success", "message" => "Вакансия успешно создана"], 201);
@@ -212,54 +213,58 @@ class JobPostController extends Controller
                 return response()->json(["status" => "error", "message" => "Ошибка валидации JSON"], 400);
             }
 
-            $user = User::where("id", "=", $content->userID)->first();
-            if($user->user_type_id !== 1) {
+            $job_post = $content->job_post;
+            $job_post_main = $job_post->job_post;
+            $job_type_array = $job_post->job_type_array;
+            $job_location = $job_post->job_location;
+            $skill_array = $job_post->skill_array;
+            $user_id = $content->user_id;
+
+            $user = User::where("id", "=", $user_id)->first();
+            if($user['user_type_id'] !== 1) {
                 return response()->json(["statue" => "error", "message" => "Only employer can create vacancies."], 400);
             }
 
-            $job_location = $request['jobLocation'];
             //checking if the data passed satisfies the validation requirements
-            $validator = Validator::make($job_location, $this->rules['job_location']);
+            $validator = Validator::make((array)$job_location, $this->rules['job_location']);
             if($validator->fails()){
                 return response()->json(["status" => "error", "message" => "Ошибки валидации", "errors" => $validator->errors()], 400);
             }
+            JobLocation::where('id', '=', $job_location->id)->update((array)$job_location);
 
-            JobLocation::where('id', '=', $job_location['id'])->update($job_location);
 
-            $job_post = $request['jobPost'];
-            $job_post_id = $job_post['id'];
-            $validator = Validator::make($job_post, $this->rules['job_post']);
+            $job_post_id = $job_post_main->id;
+            $validator = Validator::make((array)$job_post_main, $this->rules['job_post']);
             if($validator->fails()){
                 return response()->json(["status" => "error", "message" => "Ошибки валидации", "errors" => $validator->errors()], 400);
             }
+            JobPost::where('id', '=', $job_post_id)->update((array)$job_post_main);
 
-            JobPost::where('id', '=', $job_post['id'])->update($job_post);
 
-            $jobTypes = $request['jobTypes'];
             JobPostJobType::where('job_post_id', '=', $job_post_id)->delete();
-            foreach ($jobTypes as $job_type)
+            foreach ($job_type_array as $job_type)
             {
-                $validator = Validator::make($job_type, $this->rules['job_type']);
+                $validator = Validator::make((array)$job_type, $this->rules['job_type']);
                 if($validator->fails()){
                     return response()->json(["status" => "error", "message" => "Ошибки валидации", "errors" => $validator->errors()], 400);
                 }
-                JobPostJobType::insert(['job_post_id' => $job_post_id, 'job_type_id' => $job_type['id']]);
+                JobPostJobType::insert(['job_post_id' => $job_post_id, 'job_type_id' => $job_type->id]);
             }
 
+
             JobPostSkills::where('job_post_id', '=', $job_post_id)->delete();
-            $skills = $request['skills'];
             $new_skills = array();
             $job_post_skills= array();
-            foreach ($skills as $skillKey => $skillVal)
+            foreach ($skill_array as $skillKey => $skillVal)
             {
                 if (gettype($skillVal) == 'string')
                 {
                     array_push($new_skills, ['name' => $skillVal]);
-                    unset($skills[$skillKey]);
+                    unset($skill_array[$skillKey]);
                 }
                 else
                 {
-                    array_push($job_post_skills, ['skill_id' => $skillVal['id'], 'job_post_id' => $job_post_id]);
+                    array_push($job_post_skills, ['skill_id' => $skillVal->id, 'job_post_id' => $job_post_id]);
                 }
             }
             if (count($new_skills) > 0)
@@ -278,10 +283,29 @@ class JobPostController extends Controller
                     array_push($job_post_skills, ['skill_id' => $val, 'job_post_id' => $job_post_id]);
                 }
             }
-
             JobPostSkills::insert($job_post_skills);
 
             return response()->json(["status" => "success", "message" => "Вакансия успешно создана"], 201);
+        }
+        catch (\Exception $e) {
+            return response()->json(["status" => "error", "message" =>  $e->getMessage(). " " . $e->getFile() . " LINE:" . $e->getLine()], 400);
+        }
+    }
+
+    public function deleteJobPost(Request $request)
+    {
+        try
+        {
+            //checking if the request body is filled correctly
+            $content = json_decode($request->getContent());
+            if (json_last_error() != JSON_ERROR_NONE)
+            {
+                return response()->json(["status" => "error", "message" => "JSON validation error"], 400);
+            }
+
+            JobPost::find($content->job_post_id)->delete();
+
+            return response()->json(["status" => "success", "message" => "CV successfully deleted"], 200);
         }
         catch (\Exception $e) {
             return response()->json(["status" => "error", "message" =>  $e->getMessage(). " " . $e->getFile() . " LINE:" . $e->getLine()], 400);
