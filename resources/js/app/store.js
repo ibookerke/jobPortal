@@ -4,7 +4,7 @@ import Vuex from "vuex";
 import user_info from "./modules/user_info";
 import schema from "./modules/schema";
 import seeker from "./modules/seeker";
-import jobStorage from "./modules/jobStorage";
+import jobPosts from "./modules/jobPosts";
 import company from "./modules/company";
 import grid from "./modules/grid";
 
@@ -30,8 +30,8 @@ const store = new Vuex.Store({
         user_info,
         schema,
         seeker,
+        jobPosts,
         company,
-        jobStorage,
         grid
     }
 })

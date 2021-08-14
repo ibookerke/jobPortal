@@ -145,6 +145,7 @@ export default {
     watch: {
         user_info() {
             this.user = this.user_info
+            this.$store.commit('setJobPostUserID', this.user.id);
 
             if(this.user.email) {
                 this.auth = true
