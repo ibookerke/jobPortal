@@ -17,6 +17,7 @@ use App\Models\User;
 use App\Models\WorkExperience;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use PhpParser\Builder;
 
 class JobPostController extends Controller
 {
@@ -351,12 +352,15 @@ class JobPostController extends Controller
             $salary = $selected->salary;
             $city_array = $selected->cities;
             $business_stream = $selected->business_stream;
-
+            $search = $content->search;
+            $page = $content->page;
 
             $query = JobPost::where('is_active', '=', 1);
+
             if ($work_experience_type) {
                 $query->where('work_experience_type', '=', $work_experience_type);
             }
+
             if ($salary) {
                 switch ($salary) {
                     case 1:
@@ -377,61 +381,39 @@ class JobPostController extends Controller
                 }
             }
 
-            $job_posts = $query->get();
-            foreach ($job_posts as $job_post_key => $job_post) {
-                $job_post_id = $job_post['id'];
-                if ($job_type_array) {
-                    $any_of_job_type_array = false;
-                    foreach ($job_type_array as $job_type) {
-                        $test_query = JobPost::where('job_post.id', '=', $job_post_id);
-                        $test_query = $test_query->leftJoin('job_post_job_type', 'job_post.id', '=', 'job_post_job_type.job_post_id')
-                            ->where('job_post_job_type.job_type_id', '=', $job_type)
-                            ->get();
-                        if (count($test_query)) {
-                            $any_of_job_type_array = true;
-                            break;
-                        }
-                    }
-                    if (!$any_of_job_type_array) {
-                        unset($job_posts[$job_post_key]);
-                    }
-                }
-
-                $job_location_id = $job_post['location_id'];
-                $city_id = JobLocation::where('job_location.id', '=', $job_location_id)->first()['city_id'];
-                if ($city_array) {
-                    $any_of_city = false;
-                    foreach ($city_array as $city) {
-                        if ($city_id === $city) {
-                            $any_of_city = true;
-                            break;
-                        }
-                    }
-                    if (!$any_of_city) {
-                        unset($job_posts[$job_post_key]);
-                    }
-                }
-
-                $company_id = $job_post['company_id'];
-                if ($business_stream) {
-                    $any_of_business_stream = false;
-                    foreach ($business_stream as $stream) {
-                        $test_query = Company::where('companies.id', '=', $company_id);
-                        $test_query = $test_query->leftJoin('company_business_stream', 'companies.id', '=', 'company_business_stream.company_id')
-                            ->where('company_business_stream.business_stream_id', '=', $stream)
-                            ->get();
-                        if (count($test_query)) {
-                            $any_of_business_stream = true;
-                            break;
-                        }
-                    }
-                    if (!$any_of_business_stream) {
-                        unset($job_posts[$job_post_key]);
-                    }
-                }
+            if ($city_array) {
+                $query->with('job_location')->whereHas('job_location', function ($query2) use($city_array) {
+                    $query2->whereIn('city_id', (array) $city_array);
+                });
             }
 
-            return $job_posts;
+            if ($job_type_array) {
+                $query->with('job_type')->whereHas('job_type', function ($query2) use($job_type_array) {
+                    $query2->whereIn('job_type.id', (array) $job_type_array);
+                });
+            }
+
+            if ($business_stream) {
+                $query->with('companies')->whereHas('companies', function ($query2) use($business_stream) {
+                    $query2->with('business_stream')->whereHas('business_stream', function ($query3) use($business_stream) {
+                        $query3->whereIn('business_stream.id', (array) $business_stream);
+                    });
+                });
+            }
+
+            if ($search) {
+                $query->whereRaw('UPPER(job_post.job_title) LIKE ?', ['%' . strtoupper($search) . '%']);
+            }
+
+            $count_query = clone $query;
+            $count = $count_query->count();
+
+            if ($page !== 0) {
+                $query->offset($page * 5);
+            }
+
+            $data = $query->limit(5)->get();
+            return ['data' => $data, 'count_posts' => $count];
         }
         catch (\Exception $e) {
             return response()->json(["status" => "error", "message" =>  $e->getMessage(). " " . $e->getFile() . " LINE:" . $e->getLine()], 400);
