@@ -130,19 +130,6 @@
                                 <h2>Сферы деятельности</h2>
                             </v-col>
                         </v-row>
-<!--                        <v-combobox-->
-<!--                            v-model="company.business_stream"-->
-<!--                            :items="business_items"-->
-<!--                            item-text="business_stream_name"-->
-<!--                            item-value="id"-->
-<!--                            :search-input.sync="search"-->
-<!--                            hide-selected-->
-<!--                            hint="до 10"-->
-<!--                            multiple-->
-<!--                            persistent-hint-->
-<!--                            small-chips-->
-<!--                        >-->
-<!--                        </v-combobox>-->
                         <v-select
                             v-model="company.business_stream"
                             :items="business_items"
