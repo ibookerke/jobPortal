@@ -9,23 +9,17 @@
 
             <v-toolbar-title>
                 <router-link to="/" class="title">
-                    Turan
+                    JobPortal
                 </router-link>
             </v-toolbar-title>
 
             <v-spacer></v-spacer>
 
-<!--            <v-btn icon>-->
-<!--                <v-icon>mdi-dots-vertica</v-icon>-->
-<!--            </v-btn>-->
-
-            <v-btn icon>
-                <v-icon>mdi-magnify</v-icon>
-            </v-btn>
-
             <v-menu
-                left
-                bottom
+                v-model="user_menu"
+                :close-on-content-click="true"
+                :nudge-width="200"
+                offset-y
             >
                 <template v-slot:activator="{ on, attrs }">
                     <v-btn
@@ -33,48 +27,86 @@
                         v-bind="attrs"
                         v-on="on"
                     >
-                        <v-icon>mdi-cog</v-icon>
+                        <v-icon>mdi-account</v-icon>
                     </v-btn>
                 </template>
 
-                <v-list>
-                    <v-list-item
-                        v-for="n in 5"
-                        :key="n"
-                        @click="() => {}"
-                    >
-                        <v-list-item-title>Option {{ n }}</v-list-item-title>
-                    </v-list-item>
-                </v-list>
-            </v-menu>
+                <v-card v-if="auth">
+                    <v-list>
+                        <v-list-item>
+                            <v-list-item-content>
+                                <v-list-item-title>{{user.email}}</v-list-item-title>
+                                <v-list-item-subtitle v-if="user.user_type_id === 1">Работдатель</v-list-item-subtitle>
+                            </v-list-item-content>
 
-            <v-btn icon v-if="auth" @click="logOut">
-                <v-icon>mdi-logout</v-icon>
-            </v-btn>
+                        </v-list-item>
+                    </v-list>
+
+                    <v-divider></v-divider>
+
+                    <v-list>
+                        <v-list-item
+                            link
+                            @click="$router.push({name: 'profile'})"
+                        >
+                            <v-list-item-title>Профиль</v-list-item-title>
+                        </v-list-item>
+                        <v-divider></v-divider>
+                        <v-list-item
+                            link
+                            @click="logOut"
+                        >
+                            <v-list-item-title>Выйти</v-list-item-title>
+                        </v-list-item>
+                    </v-list>
+
+                </v-card>
+                <v-card v-else>
+                    <v-list>
+                        <v-list-item>
+                            <v-list-item-content>
+                                <v-list-item-title class="text-center">Вы не авторизованы</v-list-item-title>
+                            </v-list-item-content>
+                        </v-list-item>
+                    </v-list>
+
+                    <v-divider></v-divider>
+
+                    <v-list>
+                        <v-list-item
+                            link
+                            @click="$router.push({name: 'login'})"
+                        >
+                            <v-list-item-title>Войти</v-list-item-title>
+                        </v-list-item>
+
+                        <v-list-item
+                            link
+                            @click="$router.push({name: 'register'})"
+                        >
+                            <v-list-item-title>Создать аккаунт</v-list-item-title>
+                        </v-list-item>
+
+                    </v-list>
+                </v-card>
+            </v-menu>
 
 
             <template v-if="auth" v-slot:extension>
-                <v-tabs v-if="user.role === 1" align-with-title>
-                    <v-tab>
-                        <v-tab @click="$router.push('/administrator')">
-                            Профиль
-                        </v-tab>
-                    </v-tab>
-                    <v-tab>
-                        <router-link :to="{name: 'my_events'}">
-                            Мои концерты
-                        </router-link>
-                    </v-tab>
-                </v-tabs>
-                <v-tabs v-if="user.role === 2" align-with-title>
-                    <v-tab @click="$router.push('/administrator')">
+                <v-tabs v-if="user.user_type_id === 1" align-with-title>
+                    <v-tab @click="$router.push('/profile')">
                         Профиль
                     </v-tab>
-                    <v-tab @click="$router.push('/admin_locations')">
-                        Редактор Локаций
+                    <v-tab @click="$router.push('/my_job_posts')">
+                        Мои вакансии
                     </v-tab>
-                    <v-tab @click="$router.push('/admin_events')">
-                        Редактор Событий
+                </v-tabs>
+                <v-tabs v-if="user.user_type_id === 2" align-with-title>
+                    <v-tab @click="$router.push('/profile')">
+                        Профиль
+                    </v-tab>
+                    <v-tab @click="$router.push('/applications')">
+                        Отклики
                     </v-tab>
                 </v-tabs>
             </template>
@@ -87,20 +119,35 @@
 export default {
     name: "Navbar",
     props: [
-        "user"
+        "user_info"
     ],
     data() {
         return {
+            user: {},
+
             winWidth: window.innerWidth,
             mobile: false,
             tablet: false,
-            auth: false
+            auth: false,
+
+            user_menu: false,
+
+        }
+    },
+
+    created(){
+        this.user = this.user_info
+        if(this.user.email) {
+            this.auth = true
         }
     },
 
     watch: {
-        user() {
-            if(this.user) {
+        user_info() {
+            this.user = this.user_info
+            this.$store.commit('setJobPostUserID', this.user.id);
+
+            if(this.user.email) {
                 this.auth = true
             }
         },
@@ -133,12 +180,11 @@ export default {
     },
 
     methods: {
+        test() {
+            console.log(this.$store.getters.getCvProfile)
+        },
+
         logOut() {
-            axios.post("/api/auth/logout", {}, {
-                headers: {
-                    "Authorization" : "Bearer " + localStorage.getItem("token")
-                }
-            })
             this.$store.commit('userLogOut')
             localStorage.clear()
             this.$router.go() //reloads the page

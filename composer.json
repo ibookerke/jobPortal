@@ -16,8 +16,10 @@
         "tymon/jwt-auth": "^1.0"
     },
     "require-dev": {
+        "bennett-treptow/laravel-migration-generator": "^3.2",
         "facade/ignition": "^2.5",
         "fakerphp/faker": "^1.9.1",
+        "kitloong/laravel-migrations-generator": "^4.5",
         "laravel/sail": "^1.0.1",
         "mockery/mockery": "^1.4.2",
         "nunomaduro/collision": "^5.0",
@@ -36,6 +38,10 @@
         }
     },
     "scripts": {
+        "post-install-cmd": [
+            "php artisan clear-compiled",
+            "chmod -R 777 public/"
+        ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover --ansi"
