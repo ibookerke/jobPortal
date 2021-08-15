@@ -14,7 +14,7 @@ import CVEditor from "../components/seeker/CVEditor/Form";
 import CompanyEditor from "../components/company/CompanyEditor";
 import JobPostEditor from "../components/company/JobPosts/JobPostEditor/JobPostEditor";
 import Companies from "../components/company/Companies";
-import JobPosts from "../components/company/JobPosts/JobPosts";
+import JobPosts from "../components/seeker/mainpage/JobPosts";
 import CVs from "../components/seeker/CVs";
 import CV from "../components/seeker/CV";
 

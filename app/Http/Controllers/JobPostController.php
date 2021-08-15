@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BusinessStream;
 use App\Models\Cities;
 use App\Models\Company;
+use App\Models\CompanyBusinessStream;
 use App\Models\Countries;
 use App\Models\JobLocation;
 use App\Models\JobPost;
@@ -44,7 +46,7 @@ class JobPostController extends Controller
         ]
     ];
 
-    public function getAllVacancies(Request $request)
+    public function getAllCompanyJobPosts(Request $request)
     {
         try {
             //checking if the request body is filled correctly
@@ -306,6 +308,130 @@ class JobPostController extends Controller
             JobPost::find($content->job_post_id)->delete();
 
             return response()->json(["status" => "success", "message" => "CV successfully deleted"], 200);
+        }
+        catch (\Exception $e) {
+            return response()->json(["status" => "error", "message" =>  $e->getMessage(). " " . $e->getFile() . " LINE:" . $e->getLine()], 400);
+        }
+    }
+
+    public function mainPageFilters(Request $request) {
+        try {
+            //checking if the request body is filled correctly
+            $content = json_decode($request->getContent());
+            if (json_last_error() != JSON_ERROR_NONE) {
+                return response()->json(["status" => "error", "message" => "Ошибка валидации JSON"], 400);
+            }
+
+            // fetching data
+            $data = array();
+
+            $data['work_experience'] = $this->getWorkExperienceArray();
+            $data['job_type'] = $this->getJobTypeArray();
+            $data['cities'] = Cities::where('country_id', '=', 1)->get()->toArray(); //KZ cities
+            $data['business_stream'] = BusinessStream::get()->all();
+
+            return $data;
+        }
+        catch (\Exception $e) {
+            return response()->json(["status" => "error", "message" =>  $e->getMessage(). " " . $e->getFile() . " LINE:" . $e->getLine()], 400);
+        }
+    }
+
+    public function fetchJobPosts(Request $request) {
+        try {
+            //checking if the request body is filled correctly
+            $content = json_decode($request->getContent());
+            if (json_last_error() != JSON_ERROR_NONE) {
+                return response()->json(["status" => "error", "message" => "Ошибка валидации JSON"], 400);
+            }
+
+            $selected = $content->selected;
+            $work_experience_type = $selected->work_experience;
+            $job_type_array = $selected->job_type;
+            $salary = $selected->salary;
+            $city_array = $selected->cities;
+            $business_stream = $selected->business_stream;
+
+
+            $query = JobPost::where('is_active', '=', 1);
+            if ($work_experience_type) {
+                $query->where('work_experience_type', '=', $work_experience_type);
+            }
+            if ($salary) {
+                switch ($salary) {
+                    case 1:
+                        $query->where('salary', '>=', 141900);
+                        break;
+                    case 2:
+                        $query->where('salary', '>=', 283600);
+                        break;
+                    case 3:
+                        $query->where('salary', '>=', 425300);
+                        break;
+                    case 4:
+                        $query->where('salary', '>=', 567000);
+                        break;
+                    case 5:
+                        $query->where('salary', '>=', 708700);
+                        break;
+                }
+            }
+
+            $job_posts = $query->get();
+            foreach ($job_posts as $job_post_key => $job_post) {
+                $job_post_id = $job_post['id'];
+                if ($job_type_array) {
+                    $any_of_job_type_array = false;
+                    foreach ($job_type_array as $job_type) {
+                        $test_query = JobPost::where('job_post.id', '=', $job_post_id);
+                        $test_query = $test_query->leftJoin('job_post_job_type', 'job_post.id', '=', 'job_post_job_type.job_post_id')
+                            ->where('job_post_job_type.job_type_id', '=', $job_type)
+                            ->get();
+                        if (count($test_query)) {
+                            $any_of_job_type_array = true;
+                            break;
+                        }
+                    }
+                    if (!$any_of_job_type_array) {
+                        unset($job_posts[$job_post_key]);
+                    }
+                }
+
+                $job_location_id = $job_post['location_id'];
+                $city_id = JobLocation::where('job_location.id', '=', $job_location_id)->first()['city_id'];
+                if ($city_array) {
+                    $any_of_city = false;
+                    foreach ($city_array as $city) {
+                        if ($city_id === $city) {
+                            $any_of_city = true;
+                            break;
+                        }
+                    }
+                    if (!$any_of_city) {
+                        unset($job_posts[$job_post_key]);
+                    }
+                }
+
+                $company_id = $job_post['company_id'];
+                if ($business_stream) {
+                    $any_of_business_stream = false;
+                    foreach ($business_stream as $stream) {
+                        $test_query = Company::where('companies.id', '=', $company_id);
+                        $test_query = $test_query->leftJoin('company_business_stream', 'companies.id', '=', 'company_business_stream.company_id')
+                            ->where('company_business_stream.business_stream_id', '=', $stream)
+                            ->get();
+                        if (count($test_query)) {
+                            $any_of_business_stream = true;
+                            break;
+                        }
+                    }
+                    if (!$any_of_business_stream) {
+                        unset($job_posts[$job_post_key]);
+                    }
+                }
+            }
+
+            return $job_posts;
         }
         catch (\Exception $e) {
             return response()->json(["status" => "error", "message" =>  $e->getMessage(). " " . $e->getFile() . " LINE:" . $e->getLine()], 400);

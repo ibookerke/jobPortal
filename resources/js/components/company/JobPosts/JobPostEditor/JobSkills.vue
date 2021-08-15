@@ -52,7 +52,7 @@ export default {
             if (val.length > 30) {
                 this.$nextTick(() => this.model.pop());
             }
-            this.$emit('setSkills', val);
+            this.$emit('setSkillArray', val);
         },
         search (val, old) {
             if (val !== null && val !== '')
