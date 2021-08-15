@@ -84,6 +84,15 @@ export default {
         Navbar
     },
 
+    computed: {
+        companyLoading(){
+            return this.$store.getters.getCompanyLoading;
+        },
+        userLoading(){
+            return this.$store.getters.getUserLoadingStatus;
+        }
+    },
+
     created() {
         //check for auth token existence
         let token = localStorage.getItem("token")
@@ -96,50 +105,36 @@ export default {
             this.loading = false
             this.$store.commit("stopUserLoading")
         }
-
-        this.unwatch = this.$store.watch(
-            (state, getters) => getters.getUserLoadingStatus,
-            (newValue, oldValue) => {
-                if(!newValue) {
-                    this.user = this.$store.getters.getUserData
-
-                    if (this.user.user_type_id === 1) {
-                        this.watchCompanyDataLoading()
-                    }
-                    else{
-                        this.loading = false
-                    }
-                }
-            }
-        )
     },
 
     methods: {
-        watchCompanyDataLoading(){
-            //fetching data from db
-            this.$store.dispatch("loadCompany", {
-                id: this.user.id,
-                token : localStorage.getItem("token")
-            })
-            //watching for company data loading
-            this.unwatch = this.$store.watch(
-                (state, getters) => getters.getCompanyLoading,
-                (newValue, oldValue) => {
-                    if(!newValue){
-                        this.loading = false
-                    }
-                }
-            )
-
-        },
-
         login(user_data) {
             this.user = user_data
         },
     },
 
-    watch: {
+    watch:{
+        companyLoading(value){
+            if(!value){
+                this.loading = false
+            }
+        },
+        userLoading(value){
+            if(!value){
+                this.user = this.$store.getters.getUserData
 
+                if (this.user.user_type_id === 1) {
+                    //fetching data from db
+                    this.$store.dispatch("loadCompany", {
+                        id: this.user.id,
+                        token : localStorage.getItem("token")
+                    })
+                }
+                else{
+                    this.loading = false
+                }
+            }
+        }
     },
 
     beforeDestroy() {

@@ -1,31 +1,36 @@
 <template>
-    <v-container v-if="noVacancies" style="margin-bottom: 140px">
-        <v-row >
-            <v-col>
-                <h1>There are no active job posts related to your company</h1>
-                <v-btn @click="createJobPost" color="success">
-                    Create new job post
-                </v-btn>
-            </v-col>
-        </v-row>
+    <v-container v-if="!company_id">
+        <h1>You should register the company before creating job posts</h1>
     </v-container>
+    <div v-else>
+        <v-container v-if="noVacancies" style="margin-bottom: 140px">
+            <v-row >
+                <v-col>
+                    <h1>There are no active job posts related to your company</h1>
+                    <v-btn @click="createJobPost" color="success">
+                        Create new job post
+                    </v-btn>
+                </v-col>
+            </v-row>
+        </v-container>
 
-    <v-container v-else style="margin-bottom: 140px">
+        <v-container v-else style="margin-bottom: 140px">
 
-        <v-row>
-            <v-col>
-                <v-btn @click="createJobPost" color="success">
-                    Create new job post
-                </v-btn>
-            </v-col>
-        </v-row>
-        <job-post-cards :companyID="company_id"
-                        :userID="user_id"
-                        :key="forceReRenderJobPostCards"
-                        @noVacanciesData="setNoVacancies"
-                        @updateJobPost="updateJobPost"
-                        @deleteJobPost="deleteJobPost"/>
-    </v-container>
+            <v-row>
+                <v-col>
+                    <v-btn @click="createJobPost" color="success">
+                        Create new job post
+                    </v-btn>
+                </v-col>
+            </v-row>
+            <job-post-cards :companyID="company_id"
+                            :userID="user_id"
+                            :key="forceReRenderJobPostCards"
+                            @noVacanciesData="setNoVacancies"
+                            @updateJobPost="updateJobPost"
+                            @deleteJobPost="deleteJobPost"/>
+        </v-container>
+    </div>
 </template>
 
 <script>

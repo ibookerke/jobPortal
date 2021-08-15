@@ -84,6 +84,7 @@ class CompanyController extends Controller
             $company_id = Company::insertGetId($company);
 
 
+
             foreach ($content->business_stream as $record){
                 $new_record["business_stream_id"] = $record->id;
                 $new_record["company_id"] = $company_id;

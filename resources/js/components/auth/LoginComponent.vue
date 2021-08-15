@@ -90,12 +90,12 @@ export default {
                 "email": this.email,
                 "password" : this.password
             }).then(response => {
-
+                console.log(response)
                 localStorage.setItem("token", response.data.data.original.access_token)
                 this.$store.commit('setUserInfo', response.data.data.original.user)
-                this.$emit("getUser", response.data.data.original.user)
+                this.$store.commit("stopUserLoading")
                 this.$store.commit("authenticate")
-                this.$router.push({name: "profile"})
+                this.$router.go() //reloads the page
 
             }).catch(error=> {
 

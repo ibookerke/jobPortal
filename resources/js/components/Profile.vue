@@ -1,5 +1,5 @@
 <template>
-    <CompanyProfile v-if="user.user_type_id === 1" :user_info="user"></CompanyProfile>
+    <CompanyProfile v-if="user.user_type_id === 1"></CompanyProfile>
     <SeekerProfile v-else :user_info="user"></SeekerProfile>
 </template>
 <script>
@@ -10,10 +10,6 @@ import SeekerProfile from "./seeker/profile/Profile";
 export default {
     name: "Profile",
 
-    props: [
-        "user_info"
-    ],
-
     data() {
         return {
             user: {}
@@ -23,25 +19,13 @@ export default {
     components : {
         SeekerProfile,
         CompanyProfile
-
     },
 
-    watch: {
-        user_info() {
-            this.user = this.user_info
+    created() {
+        if(!this.$store.getters.getUserLoadingStatus){
+            this.user = this.$store.getters.getUserData
         }
     },
-    mounted() {
-
-    },
-    created() {
-        this.user = this.user_info
-
-    },
-
-    methods: {
-
-    }
 }
 </script>
 

@@ -1,8 +1,11 @@
 export default {
     state: {
         company_loading: true,
-        company: {},
+        company: {
+            business_stream: []
+        },
         createActionCompany: false,
+        image_loading: true,
     },
     mutations: {
         setCompanyData(state, company_data) {
@@ -11,15 +14,22 @@ export default {
         setCompanyBusinessStreamData(state, business_data) {
             state.company.business_stream = business_data
         },
+        startCompanyLoading(state) {
+            state.company_loading = true
+        },
         stopCompanyLoading(state) {
             state.company_loading = false
         },
         setCreateActionCompany(state) {
             state.createActionCompany = true
+        },
+        image_upload(state){
+            state.image_loading = false
         }
     },
     actions: {
-        async loadCompany({commit}, data) {
+        loadCompany({commit}, data) {
+            commit("startCompanyLoading")
             axios.get("/api/getCompany/" + data.id, {
                 headers: {
                     "Authorization" : "Bearer " + data.token
@@ -53,6 +63,9 @@ export default {
         },
         getCreateActionCompany(state) {
             return state.createActionCompany
+        },
+        getImageLoading(state){
+            return state.image_loading
         }
     }
 }
