@@ -186,7 +186,7 @@ export default {
             user: {},
             //company object
             company: {
-                business_stream: null
+                business_stream: []
             },
             //for showing the date picker card
             menu: false,
@@ -267,10 +267,15 @@ export default {
                     if(response.status === 201){
                         this.image_upload()
                         this.$store.commit("setCompanyData", this.company)
+                        this.$store.dispatch("loadCompany", {
+                            id: this.user.id,
+                            token: localStorage.getItem("token")
+                        })
+                        this.removed_business = []
                         this.$router.push({name : "profile"})
                     }
                 }).catch(err=> {
-                    console.log('create', err.response)
+                    console.log('create',err, err.response)
                 })
 
                 setTimeout(() => {
@@ -291,7 +296,7 @@ export default {
                         "Authorization" : "Bearer " + localStorage.getItem("token")
                     }
                 }).then(response=> {
-
+                    this.$store.commit("image_upload")
                 }).catch(err=>{
                     console.log("upload", err.response)
                 })
@@ -382,7 +387,6 @@ export default {
             //check if the action create or not
             if(this.$store.getters.getCreateActionCompany) {
                 // action create
-                console.log("action create")
                 this.actionCreate = true
             }
             else{
