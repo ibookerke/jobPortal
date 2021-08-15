@@ -51,12 +51,15 @@ Route::group(['middleware' => ['jwt.verify'], ], function() {
     Route::post('/update_seeker_cv', [CVController::class, 'updateCV']);
     Route::post('/delete_seeker_cv', [CVController::class, 'deleteCV']);
 
-    Route::post('/get_all_vacancies', [\App\Http\Controllers\JobPostController::class, 'getAllVacancies']);
+    Route::post('/get_all_vacancies', [\App\Http\Controllers\JobPostController::class, 'getAllCompanyJobPosts']);
     Route::post('/get_job_type_array', [\App\Http\Controllers\JobPostController::class, 'getJobTypeArray']);
     Route::post('/get_work_experience_array', [\App\Http\Controllers\JobPostController::class, 'getWorkExperienceArray']);
     Route::post('/create_job_post', [\App\Http\Controllers\JobPostController::class, 'createJobPost']);
     Route::post('/update_job_post', [\App\Http\Controllers\JobPostController::class, 'updateJobPost']);
     Route::post('/delete_job_post', [\App\Http\Controllers\JobPostController::class, 'deleteJobPost']);
+
+    Route::post('/get_main_page_filters', [\App\Http\Controllers\JobPostController::class, 'mainPageFilters']);
+    Route::post('/fetch_job_posts', [\App\Http\Controllers\JobPostController::class, 'fetchJobPosts']);
 
     Route::post('/get_countries', [\App\Http\Controllers\CountriesController::class, 'getCountries']);
     Route::post('/get_states_by_country', [\App\Http\Controllers\StatesController::class, 'getStatesByCountry']);

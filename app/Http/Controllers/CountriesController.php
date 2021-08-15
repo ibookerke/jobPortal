@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 
 class CountriesController extends Controller
 {
-    public function getCountries(): array
+    public static function getCountries(): array
     {
         return (new \App\Models\Countries)->getCountries();
     }
