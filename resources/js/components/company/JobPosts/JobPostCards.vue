@@ -88,7 +88,7 @@ export default {
         }
     },
     methods: {
-        getData(companyID, userID) {
+        getData() {
             axios.post(
                 '/api/get_all_vacancies',
                 {
