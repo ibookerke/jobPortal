@@ -1,6 +1,6 @@
 export default {
     state: {
-        company_loaded: false,
+        company_loading: true,
         company: {},
         createActionCompany: false,
     },
@@ -11,15 +11,15 @@ export default {
         setCompanyBusinessStreamData(state, business_data) {
             state.company.business_stream = business_data
         },
-        setCompanyStatusLoad(state) {
-            state.company_loaded = true
+        stopCompanyLoading(state) {
+            state.company_loading = false
         },
         setCreateActionCompany(state) {
             state.createActionCompany = true
         }
     },
     actions: {
-        loadCompany({commit}, data) {
+        async loadCompany({commit}, data) {
             axios.get("/api/getCompany/" + data.id, {
                 headers: {
                     "Authorization" : "Bearer " + data.token
@@ -29,7 +29,7 @@ export default {
                 //
                 // }, 2000)
                 console.log("company loaded: ", response)
-                commit("setCompanyStatusLoad")
+                commit("stopCompanyLoading")
 
                 if(response.data.company === null) {
                     commit("setCreateActionCompany")
@@ -45,8 +45,8 @@ export default {
         }
     },
     getters: {
-        getCompanyLoadStatus(state) {
-            return state.company_loaded
+        getCompanyLoading(state) {
+            return state.company_loading
         },
         getCompanyData(state) {
             return state.company

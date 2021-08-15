@@ -1,6 +1,17 @@
 <template>
-    <v-container style="margin-bottom: 140px">
-        <h1>ВОт тут будет грид(я сам сделаю)</h1>
+    <v-container v-if="noVacancies" style="margin-bottom: 140px">
+        <v-row >
+            <v-col>
+                <h1>There are no active job posts related to your company</h1>
+                <v-btn @click="createJobPost" color="success">
+                    Create new job post
+                </v-btn>
+            </v-col>
+        </v-row>
+    </v-container>
+
+    <v-container v-else style="margin-bottom: 140px">
+
         <v-row>
             <v-col>
                 <v-btn @click="createJobPost" color="success">
@@ -11,6 +22,7 @@
         <job-post-cards :companyID="company_id"
                         :userID="user_id"
                         :key="forceReRenderJobPostCards"
+                        @noVacanciesData="setNoVacancies"
                         @updateJobPost="updateJobPost"
                         @deleteJobPost="deleteJobPost"/>
     </v-container>
@@ -26,6 +38,7 @@ export default {
             user_id: null,
             company_id: null,
             forceReRenderJobPostCards: 0,
+            noVacancies: false
         };
     },
     computed: {
@@ -38,27 +51,29 @@ export default {
             let store = this.$store;
             let get = store.getters;
             this.user_id = value;
-            if(this.$store.getters.getCompanyLoadStatus)
+            if(!this.$store.getters.getCompanyLoading)
             {
                 this.company_id = get.getCompanyData.id;
                 store.commit('setJobPostCompanyID', this.company_id);
                 this.forceReRenderJobPostCards += 1;
             }
-            else
-            {
-                this.loadCompanyData();
-            }
+            // else
+            // {
+            //     this.loadCompanyData();
+            // }
         }
     },
     created() {
-        if(this.$store.getters.getCompanyLoadStatus)
-        {
+        if(!this.$store.getters.getCompanyLoading) {
             let store = this.$store;
             let get = store.getters;
             this.user_id = this.$store.getters.getJobPostUserID;
             this.company_id = get.getCompanyData.id;
             store.commit('setJobPostCompanyID', this.company_id);
             this.forceReRenderJobPostCards += 1;
+        }
+        else{
+            this.$router.push({name: "profile"})
         }
     },
     methods: {
@@ -101,15 +116,18 @@ export default {
             };
             this.$store.dispatch("loadCompany", user_data);
             this.unwatch = this.$store.watch(
-                (state, getters) => getters.getCompanyLoadStatus,
+                (state, getters) => getters.getCompanyLoading,
                 (newValue, oldValue) => {
-                    if(newValue) {
+                    if(!newValue) {
                         this.company_id = this.$store.getters.getCompanyData.id;
                         this.$store.commit('setJobPostCompanyID', this.company_id);
                         this.forceReRenderJobPostCards += 1;
                     }
                 },
             );
+        },
+        setNoVacancies(){
+            this.noVacancies = true
         }
     }
 }

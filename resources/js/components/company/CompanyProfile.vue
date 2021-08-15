@@ -92,14 +92,14 @@ export default {
 
     created() {
         this.user = this.user_info
-        if(this.$store.getters.getCompanyLoadStatus){
+        if(!this.$store.getters.getCompanyLoading){
             this.company = this.$store.getters.getCompanyData
             this.editAction = !this.$store.getters.getCreateActionCompany
             this.loading = false
         }
-        else{
-            this.loadCompanyData()
-        }
+        // else{
+        //     this.loadCompanyData()
+        // }
     },
 
     methods: {

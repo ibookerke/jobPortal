@@ -102,6 +102,9 @@ export default {
                 }
             ).
             then(response => {
+                if(response.data.length === 0){
+                    this.$emit("noVacanciesData")
+                }
                 this.vacancyArray = response.data;
             }).
             catch(error => {
