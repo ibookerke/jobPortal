@@ -1,5 +1,5 @@
 <template>
-    <div v-if="editAction">
+    <div v-if="editAction" class="main_block">
         <section class="d-flex justify-space-around pt-8 flex-wrap">
             <div class="left d-flex flex-column">
                 <div>
@@ -47,7 +47,7 @@
             </div>
         </section>
     </div>
-    <div v-else>
+    <div v-else class="main_block">
         <v-card width="80%" class="mx-auto my-6 pa-6">
             <h1>
                 Вы еще не зарегистрировали компанию
@@ -105,6 +105,9 @@ export default {
 </script>
 
 <style scoped>
+    .main_block{
+        margin-bottom: 140px;
+    }
 
     #description {
         white-space: pre-wrap;
