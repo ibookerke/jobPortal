@@ -196,7 +196,7 @@ class CVController extends Controller
             {
                 if (gettype($skillVal) == 'string')
                 {
-                    array_push($new_skills, ['name' => (array)$skillVal]);
+                    array_push($new_skills, ['name' => $skillVal]);
                     unset($skill_array[$skillKey]);
                 }
                 else
@@ -305,7 +305,7 @@ class CVController extends Controller
             {
                 if (gettype($skillVal) == 'string')
                 {
-                    array_push($new_skills, ['name' => (array)$skillVal]);
+                    array_push($new_skills, ['name' => $skillVal]);
                     unset($skill_array[$skillKey]);
                 }
                 else

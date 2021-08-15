@@ -130,19 +130,30 @@
                                 <h2>Сферы деятельности</h2>
                             </v-col>
                         </v-row>
-                        <v-combobox
+<!--                        <v-combobox-->
+<!--                            v-model="company.business_stream"-->
+<!--                            :items="business_items"-->
+<!--                            item-text="business_stream_name"-->
+<!--                            item-value="id"-->
+<!--                            :search-input.sync="search"-->
+<!--                            hide-selected-->
+<!--                            hint="до 10"-->
+<!--                            multiple-->
+<!--                            persistent-hint-->
+<!--                            small-chips-->
+<!--                        >-->
+<!--                        </v-combobox>-->
+                        <v-select
                             v-model="company.business_stream"
                             :items="business_items"
                             item-text="business_stream_name"
                             item-value="id"
-                            :search-input.sync="search"
-                            hide-selected
                             hint="до 10"
                             multiple
-                            persistent-hint
-                            small-chips
-                        >
-                        </v-combobox>
+                            outlined
+                            dense
+                            return-object
+                        ></v-select>
                     </v-container>
                 </v-col>
             </v-row>
@@ -211,7 +222,6 @@ export default {
             actionCreate: false,
         }
     },
-
     methods: {
         updateCompany() {
             this.$v.$touch();
@@ -246,7 +256,6 @@ export default {
                 }, 500);
             }
         },
-
         createCompany() {
             this.$v.$touch();
             if (this.$v.$invalid)
@@ -376,7 +385,6 @@ export default {
             });
         }
     },
-
     created() {
         this.getBusinessStream()
 
@@ -434,7 +442,6 @@ export default {
             },
             company_website_url: {
                 url,
-                minLength: minLength(2),
                 maxLength: maxLength(500)
             },
             profile_description: {
@@ -461,7 +468,6 @@ export default {
         companyWebsiteURLErrors () {
             const errors = [];
             if (!this.$v.company.company_website_url.$dirty) return errors;
-            !this.$v.company.company_website_url.minLength && errors.push('URL must be greater than 2 characters long');
             !this.$v.company.company_website_url.maxLength && errors.push('URL must be at most 500 characters long');
             !this.$v.company.company_website_url.url && errors.push('It must be URL.');
             return errors;

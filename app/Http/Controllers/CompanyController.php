@@ -178,19 +178,19 @@ class CompanyController extends Controller
 
             Company::where('id', "=", $content->id)->update($company);
 
-            $removed_business = $content->removed_business;
-
-            if(count($removed_business) > 0){
-                foreach ($removed_business as $record) {
-                    if(!property_exists($record, "cbs")){
-                        return response()->json(["status" => "error", "message" => "неправильный removed_business"], 400);
-                    }
-                    else{
-                        CompanyBusinessStream::where("id", "=", $record->cbs)->delete();
-                    }
-                }
-            }
-
+//            $removed_business = $content->removed_business;
+//
+//            if(count($removed_business) > 0){
+//                foreach ($removed_business as $record) {
+//                    if(!property_exists($record, "cbs")){
+//                        return response()->json(["status" => "error", "message" => "неправильный removed_business"], 400);
+//                    }
+//                    else{
+//                        CompanyBusinessStream::where("id", "=", $record->cbs)->delete();
+//                    }
+//                }
+//            }
+            CompanyBusinessStream::where("company_id", "=", $content->id)->delete();
             foreach ($content->business_stream as $record){
                 $new_record["business_stream_id"] = $record->id;
                 $new_record["company_id"] = $content->id;
