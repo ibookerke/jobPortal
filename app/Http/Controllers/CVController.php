@@ -7,6 +7,7 @@ use App\Models\Company;
 use App\Models\CVs;
 use App\Models\Education;
 use App\Models\Experience;
+use App\Models\JobPostActivity;
 use App\Models\SeekerSkills;
 use App\Models\Skills;
 use Illuminate\Http\Request;
@@ -351,6 +352,25 @@ class CVController extends Controller
             CVs::find($content->cv_id)->delete();
 
             return response()->json(["status" => "success", "message" => "CV successfully deleted"], 200);
+        }
+        catch (\Exception $e) {
+            return response()->json(["status" => "error", "message" =>  $e->getMessage(). " " . $e->getFile() . " LINE:" . $e->getLine()], 400);
+        }
+    }
+
+    public function respondToJobPost(Request $request)
+    {
+        try {
+            //checking if the request body is filled correctly
+            $content = json_decode($request->getContent());
+            if (json_last_error() != JSON_ERROR_NONE)
+            {
+                return response()->json(["status" => "error", "message" => "JSON validation error"], 400);
+            }
+
+            JobPostActivity::insert((array) $content);
+
+            return response()->json(["status" => "success", "message" => "CV successfully responded to Job Post"], 200);
         }
         catch (\Exception $e) {
             return response()->json(["status" => "error", "message" =>  $e->getMessage(). " " . $e->getFile() . " LINE:" . $e->getLine()], 400);

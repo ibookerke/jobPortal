@@ -50,6 +50,7 @@ Route::group(['middleware' => ['jwt.verify'], ], function() {
     Route::post('/save_seeker_cv', [CVController::class, 'createCV']);
     Route::post('/update_seeker_cv', [CVController::class, 'updateCV']);
     Route::post('/delete_seeker_cv', [CVController::class, 'deleteCV']);
+    Route::post('/seeker_respond_to_job_post', [CVController::class, 'respondToJobPost']);
 
     Route::post('/get_all_vacancies', [\App\Http\Controllers\JobPostController::class, 'getAllCompanyJobPosts']);
     Route::post('/get_job_type_array', [\App\Http\Controllers\JobPostController::class, 'getJobTypeArray']);

@@ -89,9 +89,38 @@
                                         <v-card-actions>
                                             <v-btn
                                                 color="green"
+                                                @click="respondToJobPost(item.id)"
                                             >
                                                 RESPOND
                                             </v-btn>
+                                            <v-dialog v-if="dialog"
+                                                v-model="dialog"
+                                                max-width="500px"
+                                            >
+                                                <v-card>
+                                                    <v-card-title>
+                                                        Choose CV to respond
+                                                    </v-card-title>
+                                                    <v-card-text>
+                                                        <v-select
+                                                            v-model="selectedCV"
+                                                            :items="cvs"
+                                                            :item-text="item.personalInformation.job_title"
+                                                            :item-value="item.personalInformation.id"
+                                                            placeholder="Select CV"
+                                                        ></v-select>
+                                                    </v-card-text>
+                                                    <v-card-actions>
+                                                        <v-btn
+                                                            color="primary"
+                                                            text
+                                                            @click="dialog = false"
+                                                        >
+                                                            Close
+                                                        </v-btn>
+                                                    </v-card-actions>
+                                                </v-card>
+                                            </v-dialog>
                                         </v-card-actions>
                                     </v-card>
                                 </v-col>
@@ -148,6 +177,13 @@ export default {
             maxPage: 1,
             countPosts: 0,
             jobPosts: [],
+
+            // respond logic
+            user_id: this.$store.getters.getUserData.id,
+            cvs: [],
+            dialog: false,
+            selectedCV: null,
+            selectedJobPost: null,
         };
     },
     created() {
@@ -168,16 +204,13 @@ export default {
         },
         page: function (newVal) {
             this.fetchJobPosts(newVal);
-        }
-    },
-    methods: {
-        fetchJobPosts(page=0) {
+        },
+        selectedCV: function (cv_id) {
             axios.post(
-                '/api/fetch_job_posts',
+                '/api/seeker_respond_to_job_post',
                 {
-                    'selected': this.selected,
-                    'search': this.search,
-                    'page': page
+                    'cv_id': cv_id,
+                    'job_post_id': this.selectedJobPost,
                 },
                 {
                     headers: {
@@ -186,7 +219,59 @@ export default {
                 }
             ).
             then(response => {
-                console.log(response.data)
+                if (response.status === 200) {
+                    this.fetchJobPosts();
+                }
+            }).
+            catch(error => {
+                console.log(error.response.data);
+            });
+        }
+    },
+    methods: {
+        respondToJobPost(job_post_id) {
+            this.selectedJobPost = job_post_id;
+            axios.post(
+                '/api/get_seeker_cvs',
+                {
+                    'user_id': this.user_id,
+                },
+                {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.token}`
+                    }
+                }
+            ).
+            then(response => {
+                this.cvs = response.data;
+                if (this.cvs.length > 1) {
+                    this.dialog = true;
+                }
+                else {
+                    this.selectedCV = this.cvs[0].personalInformation.id;
+                }
+            }).
+            catch(error => {
+                console.log(error.response.data);
+            });
+        },
+        fetchJobPosts(page=0) {
+            axios.post(
+                '/api/fetch_job_posts',
+                {
+                    'selected': this.selected,
+                    'search': this.search,
+                    'page': page,
+                    'user_id': this.user_id,
+                },
+                {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.token}`
+                    }
+                }
+            ).
+            then(response => {
+                // console.log(response.data)
                 this.jobPosts = response.data.data;
                 if (page === 0) {
                     this.countPosts = response.data.count_posts;
