@@ -7,6 +7,7 @@ use App\Models\Cities;
 use App\Models\Company;
 use App\Models\CompanyBusinessStream;
 use App\Models\Countries;
+use App\Models\CVs;
 use App\Models\JobLocation;
 use App\Models\JobPost;
 use App\Models\JobPostJobType;
@@ -124,7 +125,7 @@ class JobPostController extends Controller
     public function createJobPost(Request $request)
     {
         try {
-            //checking if the request body is filled correctly
+            //checking if tjob_post_activityhe request body is filled correctly
             $content = json_decode($request->getContent());
             if (json_last_error() != JSON_ERROR_NONE) {
                 return response()->json(["status" => "error", "message" => "Ошибка валидации JSON"], 400);
@@ -354,8 +355,15 @@ class JobPostController extends Controller
             $business_stream = $selected->business_stream;
             $search = $content->search;
             $page = $content->page;
+            $user_id = $content->user_id;
 
-            $query = JobPost::where('is_active', '=', 1);
+            $responded_job_posts = CVs::where('user_id', '=', $user_id)
+                ->leftJoin('job_post_activity', 'cvs.id', '=', 'job_post_activity.cv_id')
+                ->select('job_post_activity.job_post_id')->get();
+//            return $responded_job_posts;
+
+            $query = JobPost::where('is_active', '=', 1)->whereNotIn('job_post.id', $responded_job_posts);
+//            return $query->get();
 
             if ($work_experience_type) {
                 $query->where('work_experience_type', '=', $work_experience_type);
