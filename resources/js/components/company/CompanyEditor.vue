@@ -377,7 +377,7 @@ export default {
 
         this.user = this.$store.getters.getUserData
         //checking if the company data is loaded
-        if(this.$store.getters.getCompanyLoadStatus){
+        if(!this.$store.getters.getCompanyLoading){
             this.actionCreate = this.$store.getters.getCreateActionCompany
             //check if the action create or not
             if(this.$store.getters.getCreateActionCompany) {

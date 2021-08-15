@@ -17,7 +17,7 @@ class CreateCompaniesTable extends Migration
             $table->bigIncrements('id');
             $table->unsignedBigInteger('user_id')->unique();
             $table->string('company_name', 100);
-            $table->string('profile_description', 1000);
+            $table->text('profile_description');
             $table->date('establishment_date')->nullable();
             $table->string('company_website_url', 500)->nullable();
             $table->string('image')->nullable();

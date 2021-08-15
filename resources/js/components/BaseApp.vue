@@ -85,22 +85,29 @@ export default {
     },
 
     created() {
-        this.getUserLoad()
+        //check for auth token existence
+        let token = localStorage.getItem("token")
+        if(token){
+            //if localstorage have token loading the user data connected with token
+            this.$store.dispatch("LoadUser", token)
+        }
+        else{
+            //not authenticated
+            this.loading = false
+            this.$store.commit("stopUserLoading")
+        }
 
         this.unwatch = this.$store.watch(
             (state, getters) => getters.getUserLoadingStatus,
             (newValue, oldValue) => {
-                this.loading = newValue
                 if(!newValue) {
                     this.user = this.$store.getters.getUserData
-                    if (this.user.user_type_id === 1)
-                    {
-                        let user_data = {
-                            id: this.user.id,
-                            token : localStorage.getItem("token")
-                        }
 
-                        this.$store.dispatch("loadCompany", user_data)
+                    if (this.user.user_type_id === 1) {
+                        this.watchCompanyDataLoading()
+                    }
+                    else{
+                        this.loading = false
                     }
                 }
             }
@@ -108,20 +115,31 @@ export default {
     },
 
     methods: {
+        watchCompanyDataLoading(){
+            //fetching data from db
+            this.$store.dispatch("loadCompany", {
+                id: this.user.id,
+                token : localStorage.getItem("token")
+            })
+            //watching for company data loading
+            this.unwatch = this.$store.watch(
+                (state, getters) => getters.getCompanyLoading,
+                (newValue, oldValue) => {
+                    if(!newValue){
+                        this.loading = false
+                    }
+                }
+            )
+
+        },
+
         login(user_data) {
             this.user = user_data
         },
+    },
 
-        getUserLoad() {
-            let token = localStorage.getItem("token")
-            if(token){
-                this.$store.dispatch("LoadUser", token)
-            }
-            else{
-                this.loading = false
-                this.$store.commit("stopUserLoading")
-            }
-        },
+    watch: {
+
     },
 
     beforeDestroy() {
