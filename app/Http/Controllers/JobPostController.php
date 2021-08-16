@@ -425,4 +425,33 @@ class JobPostController extends Controller
             return response()->json(["status" => "error", "message" =>  $e->getMessage(). " " . $e->getFile() . " LINE:" . $e->getLine()], 400);
         }
     }
+
+    public function fetchResondedToJobPosts(Request $request) {
+        try {
+            //checking if the request body is filled correctly
+            $content = json_decode($request->getContent());
+            if (json_last_error() != JSON_ERROR_NONE) {
+                return response()->json(["status" => "error", "message" => "Ошибка валидации JSON"], 400);
+            }
+
+            $responded_job_posts = CVs::where('user_id', '=', $content->user_id)
+                ->join('job_post_activity', 'cvs.id', '=', 'job_post_activity.cv_id')
+                ->select('job_post_activity.job_post_id')
+                ->get();
+
+            return JobPost::where('is_active', '=', 1)
+                ->whereIn('job_post.id', $responded_job_posts)
+                ->leftJoin('companies', 'job_post.company_id', '=', 'companies.id')
+                ->leftJoin('work_experience_type', 'job_post.work_experience_type', '=', 'work_experience_type.id')
+                ->leftJoin('job_location', 'job_post.location_id', '=', 'job_location.id')
+                ->leftJoin('countries', 'job_location.country_id', '=', 'countries.id')
+                ->leftJoin('states', 'job_location.state_id', '=', 'states.id')
+                ->leftJoin('cities', 'job_location.city_id', '=', 'cities.id')
+                ->select('job_post.*', 'company_name', 'work_experience_type.name as work_experience', 'countries.alias as country', 'states.name as state', 'cities.name as city')
+                ->get();
+        }
+        catch (\Exception $e) {
+            return response()->json(["status" => "error", "message" =>  $e->getMessage(). " " . $e->getFile() . " LINE:" . $e->getLine()], 400);
+        }
+    }
 }

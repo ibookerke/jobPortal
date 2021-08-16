@@ -63,6 +63,8 @@ Route::group(['middleware' => ['jwt.verify'], ], function() {
     Route::post('/get_main_page_filters', [\App\Http\Controllers\JobPostController::class, 'mainPageFilters']);
     Route::post('/fetch_job_posts', [\App\Http\Controllers\JobPostController::class, 'fetchJobPosts']);
 
+    Route::post('/fetch_responded_to_job_posts', [\App\Http\Controllers\JobPostController::class, 'fetchResondedToJobPosts']);
+
     Route::post('/get_countries', [\App\Http\Controllers\CountriesController::class, 'getCountries']);
     Route::post('/get_states_by_country', [\App\Http\Controllers\StatesController::class, 'getStatesByCountry']);
     Route::post('/get_cities_by_state', [\App\Http\Controllers\CitiesController::class, 'getCitiesByState']);
