@@ -254,6 +254,7 @@ export default {
                 }
                 else if (this.cvs.length === 1) {
                     this.selectedCV = this.cvs[0].id;
+                    this.respondToJobPost();
                 }
                 else {
                     alert('you have no cvs to respond!');
