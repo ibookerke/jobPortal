@@ -358,12 +358,10 @@ class JobPostController extends Controller
             $user_id = $content->user_id;
 
             $responded_job_posts = CVs::where('user_id', '=', $user_id)
-                ->leftJoin('job_post_activity', 'cvs.id', '=', 'job_post_activity.cv_id')
+                ->join('job_post_activity', 'cvs.id', '=', 'job_post_activity.cv_id')
                 ->select('job_post_activity.job_post_id')->get();
-//            return $responded_job_posts;
 
             $query = JobPost::where('is_active', '=', 1)->whereNotIn('job_post.id', $responded_job_posts);
-//            return $query->get();
 
             if ($work_experience_type) {
                 $query->where('work_experience_type', '=', $work_experience_type);
