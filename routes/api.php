@@ -47,6 +47,7 @@ Route::group(['middleware' => ['jwt.verify'], ], function() {
     Route::post("/saveLocation", [\App\Http\Controllers\LocationController::class, "saveLocation"]);
 
     Route::post('/get_seeker_cvs', [CVController::class, 'getSeekerCVs']);
+    Route::post('/get_seeker_cvs_for_respond', [CVController::class, 'getSeekerCVsForRespond']);
     Route::post('/save_seeker_cv', [CVController::class, 'createCV']);
     Route::post('/update_seeker_cv', [CVController::class, 'updateCV']);
     Route::post('/delete_seeker_cv', [CVController::class, 'deleteCV']);

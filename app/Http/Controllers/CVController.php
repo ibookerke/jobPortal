@@ -358,6 +358,24 @@ class CVController extends Controller
         }
     }
 
+    public function getSeekerCVsForRespond(Request $request) {
+        try
+        {
+            //checking if the request body is filled correctly
+            $content = json_decode($request->getContent());
+            if (json_last_error() != JSON_ERROR_NONE)
+            {
+                return response()->json(["status" => "error", "message" => "JSON validation error"], 400);
+            }
+
+            return CVs::where('user_id', '=', $content->user_id)->get();
+        }
+        catch (\Exception $e)
+        {
+            return response()->json(["status" => "error", "message" =>  $e->getMessage(). " " . $e->getFile() . " LINE:" . $e->getLine()], 400);
+        }
+    }
+
     public function respondToJobPost(Request $request)
     {
         try {

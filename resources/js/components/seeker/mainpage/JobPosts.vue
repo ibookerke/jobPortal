@@ -89,12 +89,11 @@
                                         <v-card-actions>
                                             <v-btn
                                                 color="green"
-                                                @click="respondToJobPost(item.id)"
+                                                @click="respondToJobPostConfirmation(item.id)"
                                             >
                                                 RESPOND
                                             </v-btn>
-                                            <v-dialog v-if="dialog"
-                                                v-model="dialog"
+                                            <v-dialog v-model="dialog"
                                                 max-width="500px"
                                             >
                                                 <v-card>
@@ -105,18 +104,23 @@
                                                         <v-select
                                                             v-model="selectedCV"
                                                             :items="cvs"
-                                                            :item-text="item.personalInformation.job_title"
-                                                            :item-value="item.personalInformation.id"
+                                                            item-text="job_title"
+                                                            item-value="id"
                                                             placeholder="Select CV"
                                                         ></v-select>
                                                     </v-card-text>
                                                     <v-card-actions>
                                                         <v-btn
                                                             color="primary"
-                                                            text
+                                                            @click="respondToJobPost"
+                                                        >
+                                                            RESPOND
+                                                        </v-btn>
+                                                        <v-btn
+                                                            color="error"
                                                             @click="dialog = false"
                                                         >
-                                                            Close
+                                                            CLOSE
                                                         </v-btn>
                                                     </v-card-actions>
                                                 </v-card>
@@ -204,12 +208,14 @@ export default {
         },
         page: function (newVal) {
             this.fetchJobPosts(newVal);
-        },
-        selectedCV: function (cv_id) {
+        }
+    },
+    methods: {
+        respondToJobPost() {
             axios.post(
                 '/api/seeker_respond_to_job_post',
                 {
-                    'cv_id': cv_id,
+                    'cv_id': this.selectedCV,
                     'job_post_id': this.selectedJobPost,
                 },
                 {
@@ -220,19 +226,18 @@ export default {
             ).
             then(response => {
                 if (response.status === 200) {
+                    this.dialog = false;
                     this.fetchJobPosts();
                 }
             }).
             catch(error => {
                 console.log(error.response.data);
             });
-        }
-    },
-    methods: {
-        respondToJobPost(job_post_id) {
+        },
+        respondToJobPostConfirmation(job_post_id) {
             this.selectedJobPost = job_post_id;
             axios.post(
-                '/api/get_seeker_cvs',
+                '/api/get_seeker_cvs_for_respond',
                 {
                     'user_id': this.user_id,
                 },
@@ -247,8 +252,11 @@ export default {
                 if (this.cvs.length > 1) {
                     this.dialog = true;
                 }
+                else if (this.cvs.length === 1) {
+                    this.selectedCV = this.cvs[0].id;
+                }
                 else {
-                    this.selectedCV = this.cvs[0].personalInformation.id;
+                    alert('you have no cvs to respond!');
                 }
             }).
             catch(error => {
@@ -271,7 +279,6 @@ export default {
                 }
             ).
             then(response => {
-                // console.log(response.data)
                 this.jobPosts = response.data.data;
                 if (page === 0) {
                     this.countPosts = response.data.count_posts;
