@@ -39,10 +39,11 @@ export default {
                     sortable: false,
                     value: 'id',
                 },
-                { text: 'firstname', value: 'firstname' , sortable:false},
+                { text: 'firstname', value: 'firstname' , sortable:false },
                 { text: 'lastname', value: 'lastname', sortable: false },
                 { text: 'salary', value: 'salary' },
-                { text: 'phone', value: 'phone' },
+                { text: 'phone', value: 'phone', sortable: false },
+                { text: 'job_title', value: 'jot_title', sortable: false },
                 { text: 'gender', value: 'gender' },
                 { text: 'date_of_birth', value: 'date_of_birth' },
             ],
@@ -50,28 +51,33 @@ export default {
             grid_data: [],
         }
     },
+
     created() {
         if(this.$store.getters.getGridLoadStatus){
             this.loading = false
             this.grid_data = this.$store.getters.getGrid
         }
         else{
-            console.log("lalal")
             this.$store.dispatch("loadGrid")
-            this.unwatch = this.$store.watch(
-                (state, getters) => getters.getGridLoadStatus,
-                (newValue, oldValue) => {
-                    console.log("babbab")
-                    if(newValue) {
-                        this.loading = false
-                        this.grid_data = this.$store.getters.getGrid
-                    }
-                }
-            )
         }
-
-
     },
+
+    computed: {
+        gridLoaded(){
+            return this.$store.getters.getGridLoadStatus
+        }
+    },
+
+    watch: {
+        gridLoaded(val){
+            if(val){
+                this.loading = false
+                this.grid_data = this.$store.getters.getGrid
+            }
+        }
+    },
+
+
     methods: {
         open_row(data) {
             this.$store.commit("setRow", data)
